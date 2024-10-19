@@ -1,7 +1,6 @@
 package com.mycompany.a2;
 
 import java.util.Random;
-
 import com.codename1.charts.models.Point;
 
 import java.util.ArrayList;
@@ -17,8 +16,8 @@ public class GameWorld extends Observable {
 	private int astronautRem;
 	private int alienRem;
 	private boolean sound;
-	private ArrayList<GameObject> gameObjects = new ArrayList<>();
 	private ArrayList<Observer> observers = new ArrayList<>();
+	private GameObjectCollection gameObjects = new GameObjectCollection();
 	private Spaceship spaceship = new Spaceship();
 	Random rand = new Random();
 	
@@ -98,12 +97,16 @@ public class GameWorld extends Observable {
 	public GameObject getRandomAlien() {
         Random rand = new Random();
         ArrayList<Alien> aliens = new ArrayList<>();
+        IIterator goi = gameObjects.getIterator();
+        GameObject curr = null;
+        
+        if(goi.hasNext()) {
+        	curr = goi.getNext();
+        }
         
         // Populate the list with aliens
-        for(GameObject gameObj : gameObjects) {
-            if(gameObj instanceof Alien) {
-                aliens.add((Alien) gameObj);
-            }
+        if(curr instanceof Alien) {
+        	aliens.add((Alien) curr);
         }
         
         // Return a random alien if available
@@ -122,14 +125,17 @@ public class GameWorld extends Observable {
     public GameObject getRandomAstro() {
         Random rand = new Random();
         ArrayList<Astronaut> astros = new ArrayList<>();
+        IIterator goi = gameObjects.getIterator();
+        GameObject curr = null;
         
-        // Populate the list with astronauts
-        for(GameObject gameObj : gameObjects) {
-            if(gameObj instanceof Astronaut) {
-                astros.add((Astronaut) gameObj);
-            }
+        if(goi.hasNext()) {
+        	curr = goi.getNext();
         }
         
+        // Populate the list with aliens
+        if(curr instanceof Alien) {
+        	astros.add((Astronaut) curr);
+        }
         // Return a random astronaut if available
         if (!astros.isEmpty()) {
             int randomIndex = rand.nextInt(astros.size());
@@ -217,22 +223,18 @@ public class GameWorld extends Observable {
 	}
 	
 	
-	/**
-    * Returns the list of all game objects.
-    *
-    * @return the list of game objects.
-    */
-	public ArrayList<GameObject> getGameObjects() {
-		return gameObjects;
-	}
 	
 	/**
      * Prints the state of all game objects in the world.
      */
 	public void map() {
-		for(int i=0; i <gameObjects.size(); i++) {
-			System.out.println(gameObjects.get(i).toString());
-		}
+		IIterator goi = gameObjects.getIterator();
+        GameObject curr = null;
+        
+        while(goi.hasNext()) {
+        	curr = goi.getNext();
+        	System.out.println(curr.toString());
+        }
 	}
 	
 	/**
@@ -256,14 +258,18 @@ public class GameWorld extends Observable {
 	public int countObj(String type) {
 		int astroRem = 0;
 		int alienRem = 0;
-		for(int i = 0; i < gameObjects.size(); i++) {
-			if(gameObjects.get(i) instanceof Astronaut) {
+		IIterator goi = gameObjects.getIterator();
+        GameObject curr = null;
+        
+        while(goi.hasNext()) {
+        	curr = goi.getNext();
+        	if(curr instanceof Astronaut) {
 				astroRem++;
 			}
-			if(gameObjects.get(i) instanceof Alien) {
+			if(curr instanceof Alien) {
 				alienRem++;
 			}
-		}
+        }
 		if(type.equals("a")) {
 			return alienRem;
 		} else {
@@ -277,12 +283,16 @@ public class GameWorld extends Observable {
 	public void gameTick() {
 		System.out.println("Clock has ticked.");
 		this.clock += 1;
-		for(int i = 0; i < gameObjects.size(); i++) {
-			if(gameObjects.get(i) instanceof IMoving) {
-				IMoving mObj = (IMoving) gameObjects.get(i);
+		IIterator goi = gameObjects.getIterator();
+        GameObject curr = null;
+        
+        while(goi.hasNext()) {
+        	curr = goi.getNext();
+        	if(curr instanceof IMoving) {
+				IMoving mObj = (IMoving) curr;
 				mObj.move();
 			}
-		}
+        }
 		gameStateChanged();
 	}
 	
@@ -299,24 +309,25 @@ public class GameWorld extends Observable {
 	    float boundBottom = spaceshipY;
 	    float boundRight = spaceshipX + spaceshipSize;
 	    float boundTop = spaceshipY + spaceshipSize;
+	    IIterator goi = gameObjects.getIterator();
+        GameObject curr = null;
 	    
-	    for (int i = gameObjects.size() - 1; i >= 0; i--) { // Iterate in reverse order to prevent index out of bounds
-	        GameObject obj = gameObjects.get(i);
+	    while(goi.hasNext()) { // Iterate in reverse order to prevent index out of bounds
+	    	curr = goi.getNext();
 	        
-	        float objX = obj.getX();
-	        float objY = obj.getY();
+	        float objX = curr.getX();
+	        float objY = curr.getY();
 	        if(boundLeft <= objX && boundRight >= objX && boundBottom <= objY && boundTop >= objY) {
-	        	if(obj instanceof Astronaut) {
-	        		Astronaut a = (Astronaut) obj;
+	        	if(curr instanceof Astronaut) {
+	        		Astronaut a = (Astronaut) curr;
 	        		score += a.getHealth() * 10;
 	        		astronautRes += 1;
 	        	} else {
 	        		score -= 10;
 	        		alienRes += 1;
 	        	}
-	        	gameObjects.remove(i);
+	        	goi.remove();
 	        }
-	        
 	    }
 	    if (countObj("as") == 0) {
 	    	System.out.println("All astronauts rescued. Game Over.");
@@ -331,14 +342,16 @@ public class GameWorld extends Observable {
      */
 	public void alienClone() {
 		ArrayList<Alien> aliens = new ArrayList<>();
+		IIterator goi = gameObjects.getIterator();
+        GameObject curr = null;
         
-        for(GameObject gameObj : gameObjects) {
-            if(gameObj instanceof Alien) {
-                aliens.add((Alien) gameObj);
+        while(goi.hasNext()) {
+        	curr = goi.getNext();
+        	if(curr instanceof Alien) {
+                aliens.add((Alien) curr);
             }
         }
-        
-		if(aliens.size() >= 2) {
+        if(aliens.size() >= 2) {
 			Point nearbyPoint = getRandomAlien().getPoint();
 			Alien babyAlien = new Alien();
 			int randomPos = rand.nextInt(1);
@@ -363,12 +376,15 @@ public class GameWorld extends Observable {
      */
 	public void attack() {
 	    ArrayList<Astronaut> astronauts = new ArrayList<>();
-	    for (GameObject gameObj : gameObjects) {
-	        if (gameObj instanceof Astronaut) {
-	            astronauts.add((Astronaut) gameObj);
-	        }
-	    }
-
+	    IIterator goi = gameObjects.getIterator();
+        GameObject curr = null;
+        
+        while(goi.hasNext()) {
+        	curr = goi.getNext();
+        	if(curr instanceof Astronaut) {
+                astronauts.add((Astronaut) curr);
+            }
+        }
 	    if (!astronauts.isEmpty()) {
 			System.out.println("Astronaut getting attacked.");
 	        int randomIndex = rand.nextInt(astronauts.size());
