@@ -19,6 +19,10 @@ public class Game extends Form{
 		gw.init();
 	}
 	
+	private void commandPatternForm() {
+		
+	}
+	
 //	private void play(){ 
 //		Label myLabel=new Label("Enter a Command:"); 
 //		this.addComponent(myLabel); 
