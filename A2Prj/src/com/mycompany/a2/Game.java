@@ -1,11 +1,16 @@
 package com.mycompany.a2;
 import com.codename1.ui.events.ActionListener;
 import com.codename1.ui.layouts.BorderLayout;
+import com.codename1.ui.plaf.Border;
+import com.codename1.charts.util.ColorUtil;
+import com.codename1.ui.Button;
 import com.codename1.ui.Command;
+import com.codename1.ui.Component;
 import com.codename1.ui.Container;
 import com.codename1.ui.Form;
 import com.codename1.ui.Label; 
-import com.codename1.ui.TextField; 
+import com.codename1.ui.TextField;
+import com.codename1.ui.Toolbar;
 import com.codename1.ui.events.ActionEvent; 
 import java.lang.String; 
 public class Game extends Form{
@@ -20,8 +25,40 @@ public class Game extends Form{
 		gw.addObserver(mv);
 		gw.addObserver(sv);
 		gw.init();
+		this.setLayout(new BorderLayout());
 		Container myContainer = new Container();
+		this.add(BorderLayout.CENTER, myContainer);
+		Container northContainer = new Container();
+		Container southContainer = new Container();
+		Container westContainer = new Container();
+		Container eastContainer = new Container();
+		Container centerContainer = new Container();
 		myContainer.setLayout(new BorderLayout());
+		myContainer.add(BorderLayout.CENTER, centerContainer);
+		centerContainer.getAllStyles().setBorder(Border.createLineBorder(4, ColorUtil.rgb(255,0,0)));
+		Button centerButton = new Button("I am center button.");
+		Button westButton = new Button("I am a west button test.");
+		Button northButton = new Button("I am north button.");
+		Button southButton = new Button("I am south button test.");
+		Button eastButton = new Button("I am east button test.");
+
+		centerContainer.add(centerButton);
+		//centerContainer.addComponent(mv);
+		myContainer.add(BorderLayout.NORTH, northContainer);
+		northContainer.setLayout(new BorderLayout());
+		northContainer.add(BorderLayout.SOUTH, southContainer);
+		Toolbar toolbar = new Toolbar();
+		northContainer.add(BorderLayout.NORTH, toolbar);
+		northContainer.add(BorderLayout.SOUTH, northButton);
+		myContainer.add(BorderLayout.WEST, westContainer);
+		myContainer.add(BorderLayout.EAST, eastContainer);
+		myContainer.add(BorderLayout.SOUTH, southContainer);
+		westContainer.add(westButton);
+		eastContainer.add(eastButton);
+		southContainer.add(southButton);
+		
+
+		this.show();
 	}
 	
 	
