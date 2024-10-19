@@ -1,5 +1,8 @@
 package com.mycompany.a2;
 import com.codename1.ui.events.ActionListener;
+import com.codename1.ui.layouts.BorderLayout;
+import com.codename1.ui.Command;
+import com.codename1.ui.Container;
 import com.codename1.ui.Form;
 import com.codename1.ui.Label; 
 import com.codename1.ui.TextField; 
@@ -17,11 +20,10 @@ public class Game extends Form{
 		gw.addObserver(mv);
 		gw.addObserver(sv);
 		gw.init();
+		Container myContainer = new Container();
+		myContainer.setLayout(new BorderLayout());
 	}
 	
-	private void commandPatternForm() {
-		
-	}
 	
 //	private void play(){ 
 //		Label myLabel=new Label("Enter a Command:"); 
