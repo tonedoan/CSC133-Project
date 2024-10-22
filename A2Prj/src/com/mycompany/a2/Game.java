@@ -1,6 +1,7 @@
 package com.mycompany.a2;
 import com.codename1.ui.events.ActionListener;
 import com.codename1.ui.layouts.BorderLayout;
+import com.codename1.ui.layouts.BoxLayout;
 import com.codename1.ui.plaf.Border;
 import com.codename1.charts.util.ColorUtil;
 import com.codename1.ui.Button;
@@ -37,7 +38,13 @@ public class Game extends Form{
 		myContainer.add(BorderLayout.CENTER, centerContainer);
 		centerContainer.getAllStyles().setBorder(Border.createLineBorder(4, ColorUtil.rgb(255,0,0)));
 		Button centerButton = new Button("I am center button.");
-		Button westButton = new Button("I am a west button test.");
+		
+		Button jumpToAstronautButton = new Button(new JumpToRandomAstronaut(gw));
+		Button moveLeftButton = new Button(new MoveLeft(gw));
+		Button moveUpButton = new Button(new MoveUp(gw));
+		Button expandButton = new Button(new Expand(gw));
+
+
 		Button northButton = new Button("I am north button.");
 		Button southButton = new Button("I am south button test.");
 		Button eastButton = new Button("I am east button test.");
@@ -53,7 +60,14 @@ public class Game extends Form{
 		myContainer.add(BorderLayout.WEST, westContainer);
 		myContainer.add(BorderLayout.EAST, eastContainer);
 		myContainer.add(BorderLayout.SOUTH, southContainer);
-		westContainer.add(westButton);
+		
+		westContainer.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
+		westContainer.add(expandButton);
+		westContainer.add(moveUpButton);
+		westContainer.add(moveLeftButton);
+		westContainer.add(jumpToAstronautButton);
+
+		
 		eastContainer.add(eastButton);
 		southContainer.add(southButton);
 		
