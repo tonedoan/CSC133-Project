@@ -112,10 +112,6 @@ public class Game extends Form {
         
         this.add(BorderLayout.CENTER, mainContainer);
         
-        // Display game dimensions in the center
-        Label centerLabel = new Label("Width: " + maxWidth + " Height: " + maxHeight + "     ");
-        centerContainer.add(centerLabel);
-        
         // Toolbar setup
         Toolbar toolbar = new Toolbar();
         this.setToolbar(toolbar);
