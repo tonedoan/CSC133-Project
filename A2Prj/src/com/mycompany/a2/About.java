@@ -8,12 +8,24 @@ import com.codename1.ui.events.ActionEvent;
 import com.codename1.ui.events.ActionListener;
 import com.codename1.ui.layouts.BorderLayout;
 
+/**
+ * The About class extends Command to create an "About" dialog
+ * that displays information about the application.
+ */
 public class About extends Command {
 
+    /**
+     * Constructs an About command with the title "About Me".
+     */
     public About() {
         super("About Me");
     }
     
+    /**
+     * Displays the "About" dialog when the command is invoked.
+     *
+     * @param evt the action event triggered by this command
+     */
     public void actionPerformed(ActionEvent evt) {
         // Create a dialog
         Dialog aboutDialog = new Dialog("About");

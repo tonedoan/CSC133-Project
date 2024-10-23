@@ -100,7 +100,6 @@ public class GameWorld extends Observable {
      * @return a random Alien object if available, or null if no aliens are present.
      */
 	public GameObject getRandomAlien() {
-        Random rand = new Random();
         ArrayList<Alien> aliens = new ArrayList<>();
         IIterator goi = gameObjects.getIterator();
         GameObject curr = null;
@@ -127,7 +126,6 @@ public class GameWorld extends Observable {
      * @return a random Astronaut object if available, or null if no astronauts are present.
      */
     public GameObject getRandomAstro() {
-        Random rand = new Random();
         ArrayList<Astronaut> astros = new ArrayList<>();
         IIterator goi = gameObjects.getIterator();
         GameObject curr = null;
@@ -379,80 +377,140 @@ public class GameWorld extends Observable {
 	public void attack() {
 	    ArrayList<Astronaut> astronauts = new ArrayList<>();
 	    IIterator goi = gameObjects.getIterator();
-        GameObject curr = null;
-        
-        while(goi.hasNext()) {
-        	curr = goi.getNext();
-        	if(curr instanceof Astronaut) {
-                astronauts.add((Astronaut) curr);
-            }
-        }
-	    if (!astronauts.isEmpty()) {
-			System.out.println("Astronaut getting attacked.");
-	        int randomIndex = rand.nextInt(astronauts.size());
-	        Astronaut selectedAstronaut = astronauts.get(randomIndex);
+	    GameObject curr = null;
 
-	        // Decrease the health and speed of the selected astronaut
-	        if(selectedAstronaut.getHealth() > 0) {
-	        	selectedAstronaut.setHealth(selectedAstronaut.getHealth() - 1);
-	        	selectedAstronaut.setSpeed(selectedAstronaut.getSpeed() - 1);
-	        	selectedAstronaut.fadeColor();
+	    // Collect all astronauts
+	    while (goi.hasNext()) {
+	        curr = goi.getNext();
+	        if (curr instanceof Astronaut) {
+	            astronauts.add((Astronaut) curr);
 	        }
-			gameStateChanged();
+	    }
+	    
+	    if (!astronauts.isEmpty()) {
+	        System.out.println("Astronaut getting attacked.");
+	        
+	        // Filter astronauts with health greater than 0
+	        ArrayList<Astronaut> aliveAstronauts = new ArrayList<>();
+	        for (Astronaut astronaut : astronauts) {
+	            if (astronaut.getHealth() > 0) {
+	                aliveAstronauts.add(astronaut);
+	            }
+	        }
+
+	        // Check if there are any astronauts left with health > 0
+	        if (!aliveAstronauts.isEmpty()) {
+	            int randomIndex = rand.nextInt(aliveAstronauts.size());
+	            Astronaut selectedAstronaut = aliveAstronauts.get(randomIndex);
+
+	            // Decrease the health and speed of the selected astronaut
+	            selectedAstronaut.setHealth(selectedAstronaut.getHealth() - 1);
+	            selectedAstronaut.setSpeed(selectedAstronaut.getSpeed() - 1);
+	            selectedAstronaut.fadeColor();
+
+	            gameStateChanged();
+	        } else {
+	            System.out.println("No astronauts available.");
+	        }
 	    } else {
-	    	System.out.println("No astronauts available.");
+	        System.out.println("No astronauts available.");
 	    }
 	}
 
+
+	/**
+	 * Adds an observer to the list of observers.
+	 *
+	 * @param observer the observer to be added.
+	 */
 	public void addObserver(Observer observer) {
-		observers.add(observer);
+	    observers.add(observer);
 	}
-	
+
+	/**
+	 * Removes an observer from the list of observers.
+	 *
+	 * @param observer the observer to be removed.
+	 */
 	public void removeObserver(Observer observer) {
-		observers.remove(observer);
+	    observers.remove(observer);
 	}
-	
-	public void notifyObservers() {
-		for(Observer o : observers) {
-			o.update(null, o);
-		}
-	}
-	
+
+	/**
+	 * Notifies all observers of a change in the game state.
+	 * This method marks the observable as changed and 
+	 * notifies all registered observers.
+	 */
 	public void gameStateChanged() {
-		setChanged();
-		notifyObservers();
+	    setChanged();
+	    notifyObservers();
 	}
-	
+
+	/**
+	 * Gets the current sound state.
+	 *
+	 * @return true if sound is enabled, false otherwise.
+	 */
 	public boolean getSound() {
-		return sound;
+	    return sound;
 	}
-	
+
+	/**
+	 * Returns the current sound status as a string.
+	 *
+	 * @return "ON" if sound is enabled, "OFF" if sound is disabled.
+	 */
 	public String printSoundStatus() {
-		if(sound) {
-			return "ON";
-		} else {
-			return "OFF";
-		}
+	    if (sound) {
+	        return "ON";
+	    } else {
+	        return "OFF";
+	    }
 	}
-	
+
+	/**
+	 * Toggles the sound state between ON and OFF.
+	 * If the sound is currently ON, it will be turned OFF, and vice versa.
+	 * Notifies observers of the state change.
+	 */
 	public void toggleSound() {
-		sound = !sound;
-		gameStateChanged();
+	    sound = !sound;
+	    gameStateChanged();
 	}
-	
+
+	/**
+	 * Sets the maximum width of the game world.
+	 *
+	 * @param width the maximum width to set.
+	 */
 	public void setWidth(int width) {
-		maxWidth = width;
+	    maxWidth = width;
 	}
-	
+
+	/**
+	 * Sets the maximum height of the game world.
+	 *
+	 * @param height the maximum height to set.
+	 */
 	public void setHeight(int height) {
-		maxHeight = height;
+	    maxHeight = height;
 	}
-	
+
+	/**
+	 * Gets the maximum width of the game world.
+	 *
+	 * @return the maximum width of the game world.
+	 */
 	public int getWidth() {
-		return maxWidth;
+	    return maxWidth;
 	}
-	
+
+	/**
+	 * Gets the maximum height of the game world.
+	 *
+	 * @return the maximum height of the game world.
+	 */
 	public int getHeight() {
-		return maxHeight;
+	    return maxHeight;
 	}
 }

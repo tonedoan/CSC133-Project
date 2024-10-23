@@ -1,11 +1,10 @@
 package com.mycompany.a2;
+
 import com.codename1.ui.layouts.BorderLayout;
 import com.codename1.ui.layouts.BoxLayout;
 import com.codename1.ui.layouts.FlowLayout;
 import com.codename1.ui.plaf.Border;
-
 import java.util.Vector;
-
 import com.codename1.charts.util.ColorUtil;
 import com.codename1.ui.Button;
 import com.codename1.ui.CheckBox;
@@ -15,14 +14,22 @@ import com.codename1.ui.Container;
 import com.codename1.ui.Form;
 import com.codename1.ui.Label;
 import com.codename1.ui.Toolbar; 
+
+/**
+ * The Game class represents the main game interface, managing the layout and controls.
+ * It initializes the GameWorld, MapView, and ScoreView, and sets up the user interface.
+ */
 public class Game extends Form {
-    private GameWorld gw;
-    private MapView mv;
-    private ScoreView sv;
-    private int maxWidth;
-    private int maxHeight;
-	private Vector<Button> buttonVector = new Vector<>();
+    private GameWorld gw;    // The game world instance
+    private MapView mv;      // The map view instance
+    private ScoreView sv;    // The score view instance
+    private int maxWidth;    // Maximum width for the game area
+    private int maxHeight;   // Maximum height for the game area
+    private Vector<Button> buttonVector = new Vector<>(); // Vector to hold buttons
     
+    /**
+     * Constructs the Game interface by initializing components and setting up the layout.
+     */
     public Game() {
         gw = new GameWorld();
         mv = new MapView(gw);
@@ -30,19 +37,18 @@ public class Game extends Form {
         gw.addObserver(mv);
         gw.addObserver(sv);
         
-        
         this.setLayout(new BorderLayout());
         Container mainContainer = new Container();
         mainContainer.setLayout(new BorderLayout());
         
-        // North, South, East, West, Center containers
+        // Create containers for layout
         Container northContainer = new Container(new BorderLayout());
         Container southContainer = new Container(new FlowLayout(CENTER));
         Container westContainer = new Container(new BoxLayout(BoxLayout.Y_AXIS));
         Container eastContainer = new Container(new BoxLayout(BoxLayout.Y_AXIS));
         Container centerContainer = new Container();
         
-        // Create buttons
+        // Create buttons and associate commands
         Button jumpToAstronautButton = new Button(new JumpToRandomAstronaut(gw));
         Button moveLeftButton = new Button(new MoveLeft(gw));
         Button moveUpButton = new Button(new MoveUp(gw));
@@ -58,11 +64,10 @@ public class Game extends Form {
         Button fightButton = new Button(new Fight(gw));
         Button tickButton = new Button(new Tick(gw));
         
-        // Setting width and height of center container for mv
+        // Style center container for MapView
         centerContainer.getAllStyles().setBorder(Border.createLineBorder(4, ColorUtil.rgb(255,0,0)));
         
-
-        // Adding buttons to containers
+        // Add components to their respective containers
         centerContainer.add(mv);
         northContainer.add(BorderLayout.NORTH, sv); // Add ScoreView to the north section
         southContainer.add(newAlienButton);
@@ -80,6 +85,7 @@ public class Game extends Form {
         eastContainer.add(moveDownButton);
         eastContainer.add(contractButton);
         
+        // Add buttons to vector and style them
         buttonVector.add(expandButton);
         buttonVector.add(contractButton);
         buttonVector.add(moveUpButton);
@@ -93,22 +99,18 @@ public class Game extends Form {
         buttonVector.add(fightButton);
         buttonVector.add(tickButton);
         
-        for(Button b : buttonVector) {
-        	styleButton(b);
+        for (Button b : buttonVector) {
+            styleButton(b);
         }
 
-        
-        // Add the main containers to the main layout
+        // Assemble the main layout
         mainContainer.add(BorderLayout.CENTER, centerContainer);
         mainContainer.add(BorderLayout.NORTH, northContainer);
         mainContainer.add(BorderLayout.SOUTH, southContainer);
         mainContainer.add(BorderLayout.WEST, westContainer);
         mainContainer.add(BorderLayout.EAST, eastContainer);
         
-        // Final assembly of the form
-        this.add(BorderLayout.CENTER, mainContainer);
-        
-        // Using this to test center container.
+        // Display game dimensions in the center
         Label centerLabel = new Label("Width: " + maxWidth + " Height: " + maxHeight + "     ");
         centerContainer.add(centerLabel);
         
@@ -156,12 +158,17 @@ public class Game extends Form {
         centerLabel.setText("Width: " + maxWidth + " Height: " + maxHeight);
     }
     
+    /**
+     * Styles a button with a blue background, white text, and padding.
+     *
+     * @param button the button to style
+     */
     private void styleButton(Button button) {
-    	button.getAllStyles().setBgColor(ColorUtil.BLUE);
-    	button.getAllStyles().setBgTransparency(255);
-    	button.getAllStyles().setFgColor(ColorUtil.rgb(255,255,255));
-    	button.getAllStyles().setPadding(Component.TOP, 5);
-    	button.getAllStyles().setPadding(Component.BOTTOM, 5);
-    	button.getAllStyles().setBorder(Border.createLineBorder(2, ColorUtil.GRAY));
+        button.getAllStyles().setBgColor(ColorUtil.BLUE);
+        button.getAllStyles().setBgTransparency(255);
+        button.getAllStyles().setFgColor(ColorUtil.rgb(255, 255, 255));
+        button.getAllStyles().setPadding(Component.TOP, 5);
+        button.getAllStyles().setPadding(Component.BOTTOM, 5);
+        button.getAllStyles().setBorder(Border.createLineBorder(2, ColorUtil.GRAY));
     }
 }

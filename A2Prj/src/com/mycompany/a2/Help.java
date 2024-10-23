@@ -8,11 +8,26 @@ import com.codename1.ui.events.ActionEvent;
 import com.codename1.ui.events.ActionListener;
 import com.codename1.ui.layouts.BorderLayout;
 
+/**
+ * Represents a command to display help information in the game.
+ * This command, when executed, opens a dialog displaying key mappings and instructions for the game.
+ */
 public class Help extends Command {
+    
+    /**
+     * Constructs a Help command with the label "Help".
+     */
     public Help() {
         super("Help");
     }
     
+    /**
+     * Called when the Help command is triggered.
+     * This method creates and displays a dialog containing game instructions
+     * and key mappings, along with an "OK" button to close the dialog.
+     *
+     * @param evt the action event that triggered this command.
+     */
     public void actionPerformed(ActionEvent evt) {
         // Create a dialog
         Dialog helpDialog = new Dialog("Help");

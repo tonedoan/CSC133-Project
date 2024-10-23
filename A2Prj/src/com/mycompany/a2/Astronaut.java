@@ -10,11 +10,13 @@ import com.codename1.charts.util.ColorUtil;
 public class Astronaut extends Opponent {
     private int health;
     private int blue;
+
     /**
      * Constructs a new Astronaut with randomized properties such as size, location, and direction.
      * Sets default values for health and color.
-     * @param maxHeight 
-     * @param maxWidth 
+     *
+     * @param maxWidth  the maximum width for the astronaut's spawning area
+     * @param maxHeight the maximum height for the astronaut's spawning area
      */
     public Astronaut(int maxWidth, int maxHeight) {
         super(maxWidth, maxHeight);
@@ -29,8 +31,6 @@ public class Astronaut extends Opponent {
         direction = rand.nextInt(360);
         type = "Astronaut";
     }
-
-
 
     /**
      * Gets the current health of the astronaut.
@@ -55,7 +55,7 @@ public class Astronaut extends Opponent {
      * This simulates a visual indication of decreasing health.
      */
     public void fadeColor() {
-    	this.blue -= 20; // Decrease blue value
+        this.blue -= 20; // Decrease blue value
         if (this.blue < 0) {
             this.blue = 0; // Ensure blue does not go below 0
         }

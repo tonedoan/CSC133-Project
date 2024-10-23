@@ -9,13 +9,14 @@ import com.codename1.charts.util.ColorUtil;
  * The spaceship can move in all four cardinal directions and can change its size and location.
  */
 public class Spaceship extends Rescuer {
-	private static Spaceship spaceship;
+    private static Spaceship spaceship;
     Random rand = new Random();
 
     /**
      * Constructs a new Spaceship with a randomized location and a default size and color.
-     * @param maxHeight 
-     * @param maxWidth 
+     *
+     * @param maxWidth the maximum width of the game world
+     * @param maxHeight the maximum height of the game world
      */
     private Spaceship(int maxWidth, int maxHeight) {
         xPoint = rand.nextFloat() * maxWidth;
@@ -26,18 +27,24 @@ public class Spaceship extends Rescuer {
         type = "Spaceship";
     }
     
-    
+    /**
+     * Retrieves the singleton instance of the Spaceship, creating it if it does not exist.
+     *
+     * @param maxWidth the maximum width of the game world
+     * @param maxHeight the maximum height of the game world
+     * @return the singleton instance of the Spaceship
+     */
     public static Spaceship getSpaceship(int maxWidth, int maxHeight) {
-    	if (spaceship == null) {
-    		spaceship = new Spaceship(maxWidth, maxHeight);
-    	}
-    	return spaceship;
+        if (spaceship == null) {
+            spaceship = new Spaceship(maxWidth, maxHeight);
+        }
+        return spaceship;
     }
 
     /**
      * Sets the x-coordinate of the spaceship's position.
      *
-     * @param x the new x-coordinate of the spaceship.
+     * @param x the new x-coordinate of the spaceship
      */
     @Override
     public void setX(float x) {
@@ -47,7 +54,7 @@ public class Spaceship extends Rescuer {
     /**
      * Sets the y-coordinate of the spaceship's position.
      *
-     * @param y the new y-coordinate of the spaceship.
+     * @param y the new y-coordinate of the spaceship
      */
     @Override
     public void setY(float y) {
@@ -57,7 +64,7 @@ public class Spaceship extends Rescuer {
     /**
      * Returns a string representation of the spaceship's state, including its location, color, and size.
      *
-     * @return a string representing the state of the spaceship.
+     * @return a string representing the state of the spaceship
      */
     @Override
     public String toString() {
@@ -69,18 +76,20 @@ public class Spaceship extends Rescuer {
     /**
      * Sets the size of the spaceship.
      *
-     * @param size the new size of the spaceship.
+     * @param size the new size of the spaceship
      */
     public void setSize(int size) {
         this.size = size;
     }
     
     /** 
-     * Overrides the setColor() from GameObject class to nothing since Spaceship colors do not change.
-     * 
-     * @param color the new color of the spaceship.
+     * Overrides the setColor() method from the GameObject class.
+     * This method does nothing since the color of the spaceship does not change.
+     *
+     * @param color the new color of the spaceship (ignored)
      */
     @Override
     public void setColor(int color) {
+        // No operation: Spaceship colors do not change
     }
 }
