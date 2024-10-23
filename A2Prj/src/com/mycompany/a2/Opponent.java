@@ -7,10 +7,20 @@ public abstract class Opponent extends GameObject implements IMoving{
 	protected int speed;
     protected final int constant = 1;
     Random rand = new Random();
-    protected float randomFloat = rand.nextFloat() * 1000.0f;
 
+    /**
+     * Constructor to initialize maxWidth and maxHeight for boundary checks.
+     * 
+     * @param maxWidth the maximum width of the game area
+     * @param maxHeight the maximum height of the game area
+     */
+    public Opponent(int maxWidth, int maxHeight) {
+        this.maxWidth = maxWidth;
+        this.maxHeight = maxHeight;
+        this.direction = rand.nextInt(360); // Initialize with a random direction
+        this.speed = 5; // Default speed (can be adjusted)
+    }
 
-    
     
     /**
      * Moves the opponent based on its current speed and direction.
@@ -33,13 +43,13 @@ public abstract class Opponent extends GameObject implements IMoving{
         // Check boundaries and change direction accordingly
         if (point.getX() == 0) {
             this.direction -= 180;
-        } else if (point.getX() == 1000) {
+        } else if (point.getX() == maxWidth) {
             this.direction += 180;
         }
 
         if (point.getY() == 0) {
             this.direction -= 180;
-        } else if (point.getY() == 1000) {
+        } else if (point.getY() == maxHeight) {
             this.direction += 180;
         }
     }

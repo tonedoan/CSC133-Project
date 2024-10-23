@@ -12,15 +12,21 @@ public class Alien extends Opponent {
     /**
      * Constructs a new Alien with randomized properties such as size, location, and direction.
      * Sets default values for speed and color.
+     * @param maxHeight 
+     * @param maxWidth 
      */
-    public Alien() {
-        size = rand.nextInt(31) + 20; // Set size to a random number between 20-50
-        point = new Point(randomFloat, randomFloat);
-        color = ColorUtil.rgb(255, 0, 0); // Aliens are colored red
-        speed = (5 * constant);
-        direction = rand.nextInt(360);
-        type = "Alien";
-    }
+	public Alien(int maxWidth, int maxHeight) {
+	    super(maxWidth, maxHeight);
+	    size = rand.nextInt(31) + 20; // Set size to a random number between 20-50
+	    float xPoint = rand.nextFloat() * maxWidth; // Ensure within bounds
+	    float yPoint = rand.nextFloat() * maxHeight; // Ensure within bounds
+	    point = new Point(xPoint, yPoint);
+	    color = ColorUtil.rgb(255, 0, 0); // Aliens are colored red
+	    speed = 5; // Set speed directly
+	    direction = rand.nextInt(360);
+	    type = "Alien";
+	}
+
     
     /** 
      * Overrides the setColor() from GameObject class to nothing since Alien colors do not change.

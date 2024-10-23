@@ -2,6 +2,7 @@ package com.mycompany.a2;
 
 import java.util.Random;
 import com.codename1.charts.models.Point;
+import com.codename1.ui.Dialog;
 
 import java.util.ArrayList;
 import java.util.Observable;
@@ -15,22 +16,26 @@ public class GameWorld extends Observable {
 	private int alienRes;
 	private int astronautRem;
 	private int alienRem;
-	private boolean sound;
+	private int maxWidth;
+	private int maxHeight;
+	private boolean sound = false;
 	private ArrayList<Observer> observers = new ArrayList<>();
 	private GameObjectCollection gameObjects = new GameObjectCollection();
-	private Spaceship spaceship = new Spaceship();
+	private Spaceship spaceship;
 	Random rand = new Random();
 	
 	/**
      * Initializes the game world with a spaceship, 4 astronauts, and 3 aliens.
      */
 	public void init() {
-		gameObjects.add(spaceship);
-		for(int i = 0; i < 4; i++) { 
-			gameObjects.add(new Astronaut());
+		// Add the Spaceship to the game world
+        spaceship = Spaceship.getSpaceship(maxWidth, maxHeight);
+        gameObjects.add(spaceship);		
+        for(int i = 0; i < 4; i++) { 
+			gameObjects.add(new Astronaut(maxWidth, maxHeight));
 		}
 		for(int i = 0; i < 3; i++) { 
-			gameObjects.add(new Alien());
+			gameObjects.add(new Alien(maxWidth, maxHeight));
 		}
 		gameStateChanged();
 	}
@@ -100,13 +105,12 @@ public class GameWorld extends Observable {
         IIterator goi = gameObjects.getIterator();
         GameObject curr = null;
         
-        if(goi.hasNext()) {
+        while(goi.hasNext()) {
         	curr = goi.getNext();
-        }
-        
-        // Populate the list with aliens
-        if(curr instanceof Alien) {
-        	aliens.add((Alien) curr);
+	        // Populate the list with aliens
+	        if(curr instanceof Alien) {
+	        	aliens.add((Alien) curr);
+	        }
         }
         
         // Return a random alien if available
@@ -128,13 +132,13 @@ public class GameWorld extends Observable {
         IIterator goi = gameObjects.getIterator();
         GameObject curr = null;
         
-        if(goi.hasNext()) {
+        while(goi.hasNext()) {
         	curr = goi.getNext();
-        }
         
-        // Populate the list with aliens
-        if(curr instanceof Alien) {
-        	astros.add((Astronaut) curr);
+	        // Populate the list with astronauts
+	        if(curr instanceof Astronaut) {
+	        	astros.add((Astronaut) curr);
+	        }
         }
         // Return a random astronaut if available
         if (!astros.isEmpty()) {
@@ -236,19 +240,7 @@ public class GameWorld extends Observable {
         	System.out.println(curr.toString());
         }
 	}
-	
-	/**
-     * Prints the current game state, including clock, score, rescued astronauts, and remaining aliens.
-     */
-	public void printState() {
-		System.out.println("Clock: " + getClock());
-		System.out.println("Current Score: " + getScore());
-		System.out.println("Astronauts Rescued: " + getAstronautRes());
-		System.out.println("Aliens snuck: " + getAlienRes());
-		System.out.println("Astronauts left: " + countObj("as"));
-		System.out.println("Aliens left: " + countObj("a"));
-	}
-	
+
 	/**
      * Counts the remaining astronauts or aliens based on the type.
      *
@@ -293,7 +285,8 @@ public class GameWorld extends Observable {
 				mObj.move();
 			}
         }
-		gameStateChanged();
+        setChanged();
+        notifyObservers();
 	}
 	
 	/**
@@ -302,40 +295,49 @@ public class GameWorld extends Observable {
      */
 	public void openDoor() {
 	    System.out.println("Spaceship doors opening...");
+	    
 	    float spaceshipX = spaceship.getX();
 	    float spaceshipY = spaceship.getY();
 	    float spaceshipSize = spaceship.getSize();
+
+	    // Define boundaries based on spaceship position and size
 	    float boundLeft = spaceshipX;
 	    float boundBottom = spaceshipY;
 	    float boundRight = spaceshipX + spaceshipSize;
 	    float boundTop = spaceshipY + spaceshipSize;
+
 	    IIterator goi = gameObjects.getIterator();
-        GameObject curr = null;
-	    
-	    while(goi.hasNext()) { // Iterate in reverse order to prevent index out of bounds
-	    	curr = goi.getNext();
-	        
+	    GameObject curr;
+
+	    while (goi.hasNext()) {
+	        curr = goi.getNext();
 	        float objX = curr.getX();
 	        float objY = curr.getY();
-	        if(boundLeft <= objX && boundRight >= objX && boundBottom <= objY && boundTop >= objY) {
-	        	if(curr instanceof Astronaut) {
-	        		Astronaut a = (Astronaut) curr;
-	        		score += a.getHealth() * 10;
-	        		astronautRes += 1;
-	        	} else {
-	        		score -= 10;
-	        		alienRes += 1;
-	        	}
-	        	goi.remove();
+
+	        // Check if the object is within the bounds of the spaceship
+	        if (boundLeft <= objX && boundRight >= objX && boundBottom <= objY && boundTop >= objY) {
+	            if (curr instanceof Astronaut) {
+	                Astronaut a = (Astronaut) curr;
+	                score += a.getHealth() * 10; // Update score based on astronaut health
+	                astronautRes += 1; // Increment rescued astronaut count
+		            goi.remove(); // Remove the current object from the game world
+	            } else if (curr instanceof Alien) {
+	                score -= 10; // Penalize for capturing an alien
+	                alienRes += 1; // Increment captured alien count
+		            goi.remove(); // Remove the current object from the game world
+	            }
 	        }
 	    }
+	    
+	    // Now check if all astronauts are rescued after processing removals
 	    if (countObj("as") == 0) {
-	    	System.out.println("All astronauts rescued. Game Over.");
-	    	printState();
-	    	System.exit(0);
+	        Dialog.show("Game Over", "All astronauts have been rescued!", "OK", null);
+	        System.exit(0); // Exit the game
 	    }
-		gameStateChanged();
+	    
+	    gameStateChanged();
 	}
+
 
 	/**
      * Attempts to create a new alien at a random position if there are at least two aliens in the world.
@@ -353,7 +355,7 @@ public class GameWorld extends Observable {
         }
         if(aliens.size() >= 2) {
 			Point nearbyPoint = getRandomAlien().getPoint();
-			Alien babyAlien = new Alien();
+			Alien babyAlien = new Alien(maxWidth, maxHeight);
 			int randomPos = rand.nextInt(1);
 			if(randomPos == 0) {
 				randomPos = 5;
@@ -361,7 +363,7 @@ public class GameWorld extends Observable {
 				randomPos = -5;
 			}
 			babyAlien.setX(nearbyPoint.getX() + randomPos);
-			babyAlien.setX(nearbyPoint.getY() + randomPos);
+			babyAlien.setY(nearbyPoint.getY() + randomPos);
 			gameObjects.add(babyAlien);
 			System.out.println("Another alien appeared!");
 			gameStateChanged();
@@ -419,5 +421,38 @@ public class GameWorld extends Observable {
 	public void gameStateChanged() {
 		setChanged();
 		notifyObservers();
+	}
+	
+	public boolean getSound() {
+		return sound;
+	}
+	
+	public String printSoundStatus() {
+		if(sound) {
+			return "ON";
+		} else {
+			return "OFF";
+		}
+	}
+	
+	public void toggleSound() {
+		sound = !sound;
+		gameStateChanged();
+	}
+	
+	public void setWidth(int width) {
+		maxWidth = width;
+	}
+	
+	public void setHeight(int height) {
+		maxHeight = height;
+	}
+	
+	public int getWidth() {
+		return maxWidth;
+	}
+	
+	public int getHeight() {
+		return maxHeight;
 	}
 }

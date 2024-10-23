@@ -15,6 +15,8 @@ public abstract class GameObject {
     protected String type = "GameObject";
     protected float xPoint;
     protected float yPoint;
+    protected int maxWidth;
+    protected int maxHeight;
 
     /**
      * Default constructor initializing the game object with default values.

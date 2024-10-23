@@ -10,21 +10,26 @@ import com.codename1.charts.util.ColorUtil;
 public class Astronaut extends Opponent {
     private int health;
     private int blue;
-
     /**
      * Constructs a new Astronaut with randomized properties such as size, location, and direction.
      * Sets default values for health and color.
+     * @param maxHeight 
+     * @param maxWidth 
      */
-    public Astronaut() {
+    public Astronaut(int maxWidth, int maxHeight) {
+        super(maxWidth, maxHeight);
         blue = 255;
         size = rand.nextInt(31) + 20; // Set size to a random number between 20-50
-        point = new Point(randomFloat, randomFloat);
+        float xPoint = rand.nextFloat() * maxWidth; // Ensure within bounds
+        float yPoint = rand.nextFloat() * maxHeight; // Ensure within bounds
+        point = new Point(xPoint, yPoint);
         color = ColorUtil.rgb(0, 0, blue);
         health = 5;
-        speed = health * constant;
+        speed = health * constant; // Speed based on health
         direction = rand.nextInt(360);
         type = "Astronaut";
     }
+
 
 
     /**

@@ -9,18 +9,29 @@ import com.codename1.charts.util.ColorUtil;
  * The spaceship can move in all four cardinal directions and can change its size and location.
  */
 public class Spaceship extends Rescuer {
+	private static Spaceship spaceship;
     Random rand = new Random();
 
     /**
      * Constructs a new Spaceship with a randomized location and a default size and color.
+     * @param maxHeight 
+     * @param maxWidth 
      */
-    public Spaceship() {
-        xPoint = rand.nextFloat() * 1000.0f;
-        yPoint = rand.nextFloat() * 1000.0f;
+    private Spaceship(int maxWidth, int maxHeight) {
+        xPoint = rand.nextFloat() * maxWidth;
+        yPoint = rand.nextFloat() * maxHeight;
         size = 100;
         point = new Point(xPoint, yPoint);
         color = ColorUtil.rgb(0, 100, 0); // Spaceship is colored green
         type = "Spaceship";
+    }
+    
+    
+    public static Spaceship getSpaceship(int maxWidth, int maxHeight) {
+    	if (spaceship == null) {
+    		spaceship = new Spaceship(maxWidth, maxHeight);
+    	}
+    	return spaceship;
     }
 
     /**

@@ -1,16 +1,20 @@
 package com.mycompany.a2;
 
+import com.codename1.ui.Container;
+
 import java.util.Observable;
 import java.util.Observer;
 
-import com.codename1.ui.Container;
 
 public class MapView extends Container implements Observer{
+	private GameWorld gw;
+	
+	public MapView(GameWorld gw) {
+		this.gw = gw;
+	}
+	
 	@Override
 	public void update(Observable observable, Object data) {
-		if(observable instanceof GameWorld) {
-			GameWorld gw = (GameWorld) observable;
-			gw.map();
-		}
+		gw.map();
 	}
 }
