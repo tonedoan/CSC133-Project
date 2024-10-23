@@ -8,7 +8,6 @@ import com.codename1.charts.util.ColorUtil;
  * Astronauts have health, speed, and can move within the game world.
  */
 public class Astronaut extends Opponent {
-    protected GameWorld gw;
     private int health;
     private int blue;
 

@@ -158,7 +158,6 @@ public class Game extends Form {
         gw.setHeight(maxHeight);
         gw.setWidth(maxWidth);
         gw.init();
-        centerLabel.setText("Width: " + maxWidth + " Height: " + maxHeight);
     }
     
     /**

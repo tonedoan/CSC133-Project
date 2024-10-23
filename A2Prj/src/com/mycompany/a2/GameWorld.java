@@ -522,7 +522,7 @@ public class GameWorld extends Observable {
 	
 	/**
 	 * Resets all the numbers of the total moving objects to zero so it can prepare 
-	 * for the next game tick.
+	 * for the next game tick, also counts the amount of moving objects.
 	 */
 	public void prepareForNextTick() {
         IIterator goi = gameObjects.getIterator();

@@ -26,6 +26,7 @@ public class About extends Command {
      *
      * @param evt the action event triggered by this command
      */
+    @Override
     public void actionPerformed(ActionEvent evt) {
         // Create a dialog
         Dialog aboutDialog = new Dialog("About");
