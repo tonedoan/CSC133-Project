@@ -419,15 +419,6 @@ public class GameWorld extends Observable {
 
 
 	/**
-	 * Adds an observer to the list of observers.
-	 *
-	 * @param observer the observer to be added.
-	 */
-	public void addObserver(Observer observer) {
-	    observers.add(observer);
-	}
-
-	/**
 	 * Removes an observer from the list of observers.
 	 *
 	 * @param observer the observer to be removed.

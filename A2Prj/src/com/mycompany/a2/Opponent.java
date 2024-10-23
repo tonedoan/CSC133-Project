@@ -31,28 +31,48 @@ public abstract class Opponent extends GameObject implements IMoving{
         double thetaRadians = Math.toRadians(theta);
         double deltaX = Math.cos(thetaRadians) * speed;
         double deltaY = Math.sin(thetaRadians) * speed;
-        point.setX(point.getX() + (float) deltaX);
-        point.setY(point.getY() + (float) deltaY);
-        int addSub = rand.nextInt(1);
+
+        // Update position
+        float newX = point.getX() + (float) deltaX;
+        float newY = point.getY() + (float) deltaY;
+
+        // Check boundaries and wrap or bounce
+        if (newX < 0) {
+            newX = 0; // Stop at left boundary
+            direction += 180; // Reverse direction
+        } else if (newX > maxWidth) {
+            newX = maxWidth; // Stop at right boundary
+            direction += 180; // Reverse direction
+        }
+
+        if (newY < 0) {
+            newY = 0; // Stop at top boundary
+            direction += 180; // Reverse direction
+        } else if (newY > maxHeight) {
+            newY = maxHeight; // Stop at bottom boundary
+            direction += 180; // Reverse direction
+        }
+
+        // Update the point with the new position
+        point.setX(newX);
+        point.setY(newY);
+
+        // Randomly adjust the direction
+        int addSub = rand.nextInt(2); // Changed to 2 to allow equal chance of +5 or -5
         if (addSub == 1) {
             this.direction += 5;
         } else {
             this.direction -= 5;
         }
 
-        // Check boundaries and change direction accordingly
-        if (point.getX() == 0) {
-            this.direction -= 180;
-        } else if (point.getX() == maxWidth) {
-            this.direction += 180;
-        }
-
-        if (point.getY() == 0) {
-            this.direction -= 180;
-        } else if (point.getY() == maxHeight) {
-            this.direction += 180;
+        // Normalize the direction to keep it within 0-360 degrees
+        if (this.direction >= 360) {
+            this.direction -= 360;
+        } else if (this.direction < 0) {
+            this.direction += 360;
         }
     }
+
     
     /**
      *  Sets size of Opponent but opponents aren't supposed to change size after creation.

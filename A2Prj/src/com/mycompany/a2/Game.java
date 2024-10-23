@@ -110,6 +110,8 @@ public class Game extends Form {
         mainContainer.add(BorderLayout.WEST, westContainer);
         mainContainer.add(BorderLayout.EAST, eastContainer);
         
+        this.add(BorderLayout.CENTER, mainContainer);
+        
         // Display game dimensions in the center
         Label centerLabel = new Label("Width: " + maxWidth + " Height: " + maxHeight + "     ");
         centerContainer.add(centerLabel);
