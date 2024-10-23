@@ -8,6 +8,7 @@ import com.codename1.charts.util.ColorUtil;
  * Astronauts have health, speed, and can move within the game world.
  */
 public class Astronaut extends Opponent {
+    protected GameWorld gw;
     private int health;
     private int blue;
 
@@ -18,8 +19,8 @@ public class Astronaut extends Opponent {
      * @param maxWidth  the maximum width for the astronaut's spawning area
      * @param maxHeight the maximum height for the astronaut's spawning area
      */
-    public Astronaut(int maxWidth, int maxHeight) {
-        super(maxWidth, maxHeight);
+    public Astronaut(int maxWidth, int maxHeight, GameWorld gw) {
+        super(maxWidth, maxHeight, gw);
         blue = 255;
         size = rand.nextInt(31) + 20; // Set size to a random number between 20-50
         float xPoint = rand.nextFloat() * maxWidth; // Ensure within bounds

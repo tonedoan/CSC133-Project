@@ -16,8 +16,8 @@ public class Alien extends Opponent {
      * @param maxWidth  the maximum width for the alien's spawning area
      * @param maxHeight the maximum height for the alien's spawning area
      */
-    public Alien(int maxWidth, int maxHeight) {
-        super(maxWidth, maxHeight);
+    public Alien(int maxWidth, int maxHeight, GameWorld gw) {
+        super(maxWidth, maxHeight, gw);
         size = rand.nextInt(31) + 20; // Set size to a random number between 20-50
         float xPoint = rand.nextFloat() * maxWidth; // Ensure within bounds
         float yPoint = rand.nextFloat() * maxHeight; // Ensure within bounds

@@ -18,6 +18,8 @@ public class GameWorld extends Observable {
 	private int alienRem;
 	private int maxWidth;
 	private int maxHeight;
+	private int movingCount = 0; // Track number of moving objects
+    private int totalMovingObjects = 0; // Total number of moving objects
 	private boolean sound = false;
 	private ArrayList<Observer> observers = new ArrayList<>();
 	private GameObjectCollection gameObjects = new GameObjectCollection();
@@ -32,10 +34,10 @@ public class GameWorld extends Observable {
         spaceship = Spaceship.getSpaceship(maxWidth, maxHeight);
         gameObjects.add(spaceship);		
         for(int i = 0; i < 4; i++) { 
-			gameObjects.add(new Astronaut(maxWidth, maxHeight));
+			gameObjects.add(new Astronaut(maxWidth, maxHeight, this));
 		}
 		for(int i = 0; i < 3; i++) { 
-			gameObjects.add(new Alien(maxWidth, maxHeight));
+			gameObjects.add(new Alien(maxWidth, maxHeight, this));
 		}
 		gameStateChanged();
 	}
@@ -271,6 +273,7 @@ public class GameWorld extends Observable {
      * Advances the game clock and moves all moving objects in the world.
      */
 	public void gameTick() {
+		prepareForNextTick();
 		System.out.println("Clock has ticked.");
 		this.clock += 1;
 		IIterator goi = gameObjects.getIterator();
@@ -283,8 +286,6 @@ public class GameWorld extends Observable {
 				mObj.move();
 			}
         }
-        setChanged();
-        notifyObservers();
 	}
 	
 	/**
@@ -353,7 +354,7 @@ public class GameWorld extends Observable {
         }
         if(aliens.size() >= 2) {
 			Point nearbyPoint = getRandomAlien().getPoint();
-			Alien babyAlien = new Alien(maxWidth, maxHeight);
+			Alien babyAlien = new Alien(maxWidth, maxHeight, this);
 			int randomPos = rand.nextInt(1);
 			if(randomPos == 0) {
 				randomPos = 5;
@@ -504,4 +505,43 @@ public class GameWorld extends Observable {
 	public int getHeight() {
 	    return maxHeight;
 	}
+	
+	/**
+	 * This method is used to see whether the count of the moving objects
+	 * equals the total moving objects, if so notify observers.
+	 * After, reset the movement tracking.
+	 */
+	public void notifyMovement() {
+        movingCount++; // Increment the count of moving objects
+        if (movingCount == totalMovingObjects) {
+            // All moving objects have moved
+            gameStateChanged(); // Notify state change once
+            resetMovementTracking(); // Reset for the next tick
+        }
+    }
+	
+	/**
+	 * Resets all the numbers of the total moving objects to zero so it can prepare 
+	 * for the next game tick.
+	 */
+	public void prepareForNextTick() {
+        IIterator goi = gameObjects.getIterator();
+        totalMovingObjects = 0; // Reset total count
+
+        while (goi.hasNext()) {
+            GameObject curr = goi.getNext();
+            if (curr instanceof IMoving) {
+                totalMovingObjects++; // Count each moving object
+            }
+        }
+        movingCount = 0; // Reset count for this tick
+    }
+
+	/**
+	 * Resets the moving count of the objects to 0.
+	 */
+    private void resetMovementTracking() {
+        movingCount = 0; // Reset the moving count for the next tick
+    }
+
 }

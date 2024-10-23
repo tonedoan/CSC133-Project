@@ -3,22 +3,26 @@ package com.mycompany.a2;
 import java.util.Random;
 
 public abstract class Opponent extends GameObject implements IMoving{
+	protected GameWorld gw;
 	protected int direction;
 	protected int speed;
     protected final int constant = 1;
     Random rand = new Random();
+    protected boolean hasMoved;
 
     /**
      * Constructor to initialize maxWidth and maxHeight for boundary checks.
      * 
      * @param maxWidth the maximum width of the game area
      * @param maxHeight the maximum height of the game area
+     * @param gw 
      */
-    public Opponent(int maxWidth, int maxHeight) {
+    public Opponent(int maxWidth, int maxHeight, GameWorld gw) {
         this.maxWidth = maxWidth;
         this.maxHeight = maxHeight;
         this.direction = rand.nextInt(360); // Initialize with a random direction
         this.speed = 5; // Default speed (can be adjusted)
+        this.gw = gw;
     }
 
     
@@ -71,6 +75,8 @@ public abstract class Opponent extends GameObject implements IMoving{
         } else if (this.direction < 0) {
             this.direction += 360;
         }
+        
+        gw.notifyMovement();
     }
 
     
