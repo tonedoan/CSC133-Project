@@ -120,7 +120,7 @@ public class Game extends Form {
         Toolbar toolbar = new Toolbar();
         this.setToolbar(toolbar);
         Command help = new Help();
-        Command quit = new ExitGame(); // Pass gw to ExitGame if needed
+        Command quit = new ExitGame(); 
         CheckBox sound = new CheckBox();
         sound.getAllStyles().setBgTransparency(255);
         sound.getAllStyles().setBgColor(ColorUtil.LTGRAY);
@@ -149,6 +149,7 @@ public class Game extends Form {
         addKeyListener('w', newAlienButton.getCommand());
         addKeyListener('f', fightButton.getCommand());
         addKeyListener('t', tickButton.getCommand());
+        addKeyListener('x', quit);
         
         // Show the game form
         this.show();
