@@ -30,8 +30,7 @@ public class GameWorld extends Observable implements ICollider {
 	private Alien lastCreatedAlien;
 	private int flagTimer = 0;
     private BGSound bgSound;
-	private Sound astroAlien, alienAlien;
-	Sound scoreSound;
+	private Sound astroAlien, alienAlien, scoreSound;
     private boolean isPaused; // To track whether the game is paused
 
 	
@@ -633,9 +632,9 @@ public class GameWorld extends Observable implements ICollider {
 	
 	public void createSounds() {
         bgSound = new BGSound("music.mp3");
-        //astroAlien = new Sound("Collide.mp3"); // Need to use another mp3 file 
-        //alienAlien = new Sound("Alien.mp3"); // Need to use another mp3 file
-        scoreSound = new Sound("zoop.mp3");
+//        astroAlien = new Sound("boing.mp3"); // Inputstream not adding these sounds.
+//        alienAlien = new Sound("bang.mp3"); 
+//        scoreSound = new Sound("zoop.mp3");
     }
 	
 	// Getters for the sound objects, to access the specific sounds

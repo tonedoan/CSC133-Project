@@ -72,5 +72,50 @@ public class MapView extends Container implements Observer {
             ));
         }
     }
+    
+    @Override
+    public void pointerPressed(int x, int y) {
+        boolean clickedOnAstronaut = false;
+        // Adjust the pointer coordinates based on MapView's position
+        x = x - getParent().getAbsoluteX();
+        y = y - getParent().getAbsoluteY();
+        Point pPtrRelPrnt = new Point(x, y);
+        Point pCmpRelPrnt = new Point(getX(), getY());
 
+        // Iterate through each GameObject in the GameWorld.
+        IIterator goi = gw.getGameObjects().getIterator();
+        while(goi.hasNext()) {
+            // Get the next GameObject.
+            GameObject gameObject = goi.getNext();
+
+            // Check if the pointer is within the object's bounds
+            if (gameObject.contains(pPtrRelPrnt, pCmpRelPrnt) && gw.isPaused()) {	// Check if game is paused and whether pointer is in gameObject
+                if (gameObject instanceof Astronaut) {
+                    Astronaut astronaut = (Astronaut) gameObject;
+
+                    // Change the appearance of the astronaut (e.g., change color or image)
+                    astronaut.setSelected(!astronaut.isSelected()); // For example, a flag to indicate selection
+                    
+                    clickedOnAstronaut = true;
+                    // After making changes, repaint the MapView to update the view
+                }
+            }
+			// If the click was outside any astronaut, deselect all astronauts
+            if (!clickedOnAstronaut) {
+                IIterator goiDeselect = gw.getGameObjects().getIterator();
+                while (goiDeselect.hasNext()) {
+                    // Get the next GameObject.
+                    GameObject gameObject1 = goiDeselect.getNext();
+
+                    if (gameObject1 instanceof Astronaut) {
+                        Astronaut astronaut = (Astronaut) gameObject1;
+                        // Deselect all astronauts
+                        astronaut.setSelected(false);
+                    }
+                }
+            }
+        }
+        repaint();
+    }
 } 
+

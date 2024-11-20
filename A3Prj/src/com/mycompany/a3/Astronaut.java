@@ -11,7 +11,9 @@ import com.codename1.ui.Graphics;
 public class Astronaut extends Opponent {
     private int health;
     private int blue;
-    private boolean vulnerable = true;
+    private int px, py, xLoc, yLoc;
+    private boolean selected;
+    private boolean vulnerable;
 
     /**
      * Constructs a new Astronaut with randomized properties such as size, location, and direction.
@@ -33,6 +35,8 @@ public class Astronaut extends Opponent {
         speed = health * constant; // Speed based on health
         direction = rand.nextInt(360);
         type = "Astronaut";
+        selected = false;
+        vulnerable = true;
     }
 
     /**
@@ -117,7 +121,15 @@ public class Astronaut extends Opponent {
         yPoints[2] = (int)(pCmpRelPrnt.getY() - size / 2); // Same as yPoints[0]
 
     	g.setColor(color);
-    	g.fillPolygon(xPoints, yPoints, 3);
+
+        if(!isSelected() || !gw.isPaused()) {
+        	g.fillPolygon(xPoints, yPoints, 3);
+        } else {
+        	g.drawPolygon(xPoints, yPoints, 3);
+        }
+        if(!gw.isPaused()) {
+        	setSelected(false);
+        }
     }
     
     @Override
@@ -133,4 +145,39 @@ public class Astronaut extends Opponent {
     public void setVul(boolean value) {
     	this.vulnerable = value;
     }
+
+	@Override
+	public void setSelected(boolean b) {
+		selected = b;
+	}
+
+	@Override
+	public boolean isSelected() {
+		return selected;
+	}
+
+	@Override
+	public boolean contains(Point pPtrRelPrnt, Point pCmpRelPrnt) {
+		px = (int) pPtrRelPrnt.getX();
+		py = (int) pPtrRelPrnt.getY();
+		xLoc = (int) pCmpRelPrnt.getX() + (int) point.getX() - size / 2;
+		yLoc = (int) pCmpRelPrnt.getY() + (int) point.getY() - size / 2;
+		// Calculate the three vertices of the triangle
+	    int x0 = xLoc, y0 = yLoc + size;
+	    int x1 = xLoc + size, y1 = yLoc + size;
+	    int x2 = xLoc + size / 2, y2 = yLoc;
+
+	    // Check if the point is inside the triangle using the area method
+	    int area = Math.abs((x1 - x0) * (y2 - y0) - (x2 - x0) * (y1 - y0)); // Total area of the triangle
+	    int area1 = Math.abs((px - x0) * (y1 - y0) - (x1 - x0) * (py - y0)); // Area with point and edge (x0, y0) -> (x1, y1)
+	    int area2 = Math.abs((px - x1) * (y2 - y1) - (x2 - x1) * (py - y1)); // Area with point and edge (x1, y1) -> (x2, y2)
+	    int area3 = Math.abs((px - x2) * (y0 - y2) - (x0 - x2) * (py - y2)); // Area with point and edge (x2, y2) -> (x0, y0)
+
+	    // If the sum of the areas is equal to the total area, the point is inside the triangle
+	    if (area == (area1 + area2 + area3)) {
+	        return true;
+	    } else {
+	        return false;
+	    }
+	}
 }

@@ -22,7 +22,7 @@ public class Sound {
     	while (m == null) {
 			try {
 				InputStream is = Display.getInstance().getResourceAsStream(getClass(), "/" + fileName);
-				m = MediaManager.createMedia(is, "audio/mp3");
+				this.m = MediaManager.createMedia(is, "audio/mp3");
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

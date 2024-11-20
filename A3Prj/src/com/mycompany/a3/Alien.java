@@ -89,4 +89,22 @@ public class Alien extends Opponent {
     public void setSpawn(boolean value) {
     	this.canSpawn = value;
     }
+
+	@Override
+	public void setSelected(boolean b) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public boolean isSelected() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean contains(Point pPtrRelPrnt, Point pCmpRelPrnt) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }
