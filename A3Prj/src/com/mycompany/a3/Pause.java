@@ -7,7 +7,6 @@ import com.codename1.ui.events.ActionEvent;
 
 public class Pause extends Command {
     private GameWorld gw;
-	private Button pauseButton;
 
 	/**
      * Constructs a new Pause command with a reference to the GameWorld and the Pause button.
@@ -15,10 +14,9 @@ public class Pause extends Command {
      * @param gw the GameWorld instance that this command will interact with
      * @param pauseButton the Pause button whose label we need to change
      */
-    public Pause(GameWorld gw, Button pauseButton) {
+    public Pause(GameWorld gw) {
         super("Pause");
         this.gw = gw;
-        this.pauseButton = pauseButton;
     }
 
     /**
@@ -29,12 +27,5 @@ public class Pause extends Command {
     @Override
     public void actionPerformed(ActionEvent evt) {
     	gw.togglePause();
-    	
-    	// Check the current game mode and update the button label accordingly
-        if (gw.isPaused()) {
-            pauseButton.setText("Resume"); // Change label to "Play" when paused
-        } else {
-            pauseButton.setText("Pause"); // Change label to "Pause" when playing
-        }
     }
 }

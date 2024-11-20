@@ -180,4 +180,12 @@ public class Astronaut extends Opponent {
 	        return false;
 	    }
 	}
+
+	public void heal() {
+		if(gw.isPaused()) {
+			this.health = 5;
+	        this.color = ColorUtil.rgb(0, 0, blue);
+		}
+		
+	}
 }

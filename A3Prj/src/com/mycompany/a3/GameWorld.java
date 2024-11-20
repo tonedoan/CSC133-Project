@@ -2,6 +2,7 @@ package com.mycompany.a3;
 
 import java.util.Random;
 import com.codename1.charts.models.Point;
+import com.codename1.ui.Button;
 import com.codename1.ui.Dialog;
 
 import java.util.ArrayList;
@@ -475,8 +476,9 @@ public class GameWorld extends Observable implements ICollider {
 	    
 	    // Now check if all astronauts are rescued after processing removals
 	    if (countObj("as") == 0) {
-	        Dialog.show("Game Over", "All astronauts have been rescued!", "OK", null);
-	        System.exit(0); // Exit the game
+	    	// Display the score in the game over message
+	        String message = "All astronauts have been rescued! Your score: " + getScore();
+	        Dialog.show("Game Over", message, "OK", null);	        System.exit(0); // Exit the game
 	    }
 	    
 	    gameStateChanged();
@@ -669,5 +671,23 @@ public class GameWorld extends Observable implements ICollider {
 	public void heal() {
 		// TODO Auto-generated method stub
 		
+	}
+
+	public Astronaut getSelectedAstronaut() {
+	    IIterator goi = gameObjects.getIterator();  // Assuming gameObjects is the collection of GameObjects
+	    while(goi.hasNext()) {
+	        GameObject gameObject = goi.getNext();
+	        
+	        // Check if the object is an astronaut
+	        if (gameObject instanceof Astronaut) {
+	            Astronaut astronaut = (Astronaut) gameObject;
+	            
+	            // Return the astronaut if it's selected
+	            if (astronaut.isSelected()) {
+	                return astronaut;
+	            }
+	        }
+	    }
+	    return null;  // No selected astronaut found
 	}
 }

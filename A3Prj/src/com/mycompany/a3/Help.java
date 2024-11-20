@@ -43,8 +43,8 @@ public class Help extends Command {
                 + "e - Expand spaceship\n"
                 + "c - Contract spaceship\n"
                 + "s - Open door\n"
-                + "w - Create new alien\n"
-                + "f - Attack\n");
+                + "h - Heal Astronaut\n"
+                + "f - Pause/Resume\n");
         
         // Set the TextArea to be non-editable and wrap text
         helpText.setEditable(false);

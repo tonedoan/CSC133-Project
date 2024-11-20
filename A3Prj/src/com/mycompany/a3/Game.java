@@ -28,6 +28,25 @@ public class Game extends Form  implements Runnable{
     private int maxHeight;   // Maximum height for the game area
     private int timerSec;
     private Vector<Button> buttonVector = new Vector<>(); // Vector to hold buttons
+    private Vector<Button> pausedButtonVector = new Vector<>(); // Vector to hold buttons
+	private boolean isPaused;
+	// Declare the buttons as class fields
+	private Button jumpToAstronautButton;
+	private Button moveLeftButton;
+	private Button moveUpButton;
+	private Button expandButton;
+
+	private Button scoreButton;
+	private Button jumpToAlienButton;
+	private Button moveRightButton;
+	private Button moveDownButton;
+	private Button contractButton;
+
+	private Button healButton;
+	private Button pauseButton;
+	private Pause pauseCommand;
+	private Command quit; 
+
     
     /**
      * Constructs the Game interface by initializing components and setting up the layout.
@@ -51,22 +70,19 @@ public class Game extends Form  implements Runnable{
         Container eastContainer = new Container(new BoxLayout(BoxLayout.Y_AXIS));
         
         // Create buttons and associate commands
-        Button jumpToAstronautButton = new Button(new JumpToRandomAstronaut(gw));
-        Button moveLeftButton = new Button(new MoveLeft(gw));
-        Button moveUpButton = new Button(new MoveUp(gw));
-        Button expandButton = new Button(new Expand(gw));
+        jumpToAstronautButton = new Button(new JumpToRandomAstronaut(gw));
+        moveLeftButton = new Button(new MoveLeft(gw));
+        moveUpButton = new Button(new MoveUp(gw));
+        expandButton = new Button(new Expand(gw));
         
-        Button scoreButton = new Button(new Score(gw));
-        Button jumpToAlienButton = new Button(new JumpToRandomAlien(gw));
-        Button moveRightButton = new Button(new MoveRight(gw));
-        Button moveDownButton = new Button(new MoveDown(gw));
-        Button contractButton = new Button(new Contract(gw));
+        scoreButton = new Button(new Score(gw));
+        jumpToAlienButton = new Button(new JumpToRandomAlien(gw));
+        moveRightButton = new Button(new MoveRight(gw));
+        moveDownButton = new Button(new MoveDown(gw));
+        contractButton = new Button(new Contract(gw));
         
-        Button healButton = new Button(new Heal(gw));
-        Button pauseButton = new Button("Pause");
-        Pause pauseCommand = new Pause(gw, pauseButton);
-        pauseButton.setCommand(pauseCommand);
-
+        healButton = new Button(new Heal(gw));
+        pauseButton = new Button(new Pause(gw));
         
         // Style center container for MapView
         mv.getAllStyles().setBorder(Border.createLineBorder(4, ColorUtil.rgb(255,0,0)));
@@ -101,6 +117,16 @@ public class Game extends Form  implements Runnable{
         buttonVector.add(healButton);
         buttonVector.add(pauseButton);
         
+        pausedButtonVector.add(expandButton);
+        pausedButtonVector.add(contractButton);
+        pausedButtonVector.add(moveUpButton);
+        pausedButtonVector.add(moveDownButton);
+        pausedButtonVector.add(moveLeftButton);
+        pausedButtonVector.add(moveRightButton);
+        pausedButtonVector.add(jumpToAstronautButton);
+        pausedButtonVector.add(jumpToAlienButton);
+        pausedButtonVector.add(scoreButton);
+        
         for (Button b : buttonVector) {
             styleButton(b);
         }
@@ -120,7 +146,7 @@ public class Game extends Form  implements Runnable{
         Toolbar toolbar = new Toolbar();
         this.setToolbar(toolbar);
         Command help = new Help();
-        Command quit = new ExitGame(); 
+        quit = new ExitGame(); 
         CheckBox sound = new CheckBox();
         sound.getAllStyles().setBgTransparency(255);
         sound.getAllStyles().setBgColor(ColorUtil.LTGRAY);
@@ -146,7 +172,7 @@ public class Game extends Form  implements Runnable{
         addKeyListener('d', moveDownButton.getCommand());
         addKeyListener('o', jumpToAstronautButton.getCommand());
         addKeyListener('a', jumpToAlienButton.getCommand());
-        addKeyListener('w', healButton.getCommand());
+        addKeyListener('h', healButton.getCommand());
         addKeyListener('f', pauseButton.getCommand());
         addKeyListener('x', quit);
         
@@ -178,9 +204,57 @@ public class Game extends Form  implements Runnable{
         button.getAllStyles().setPadding(Component.BOTTOM, 5);
         button.getAllStyles().setBorder(Border.createLineBorder(2, ColorUtil.GRAY));
     }
+    
+    /**
+     * Disables all game-related buttons.
+     */
+    private void disableButtons() {
+        for (Button b : pausedButtonVector) {
+            b.setEnabled(false);
+            b.getAllStyles().setBgColor(ColorUtil.GRAY); // Set gray color when disabled
+            b.getAllStyles().setBgTransparency(255);  // Make it look disabled
+        }
+     // Key Bindings and Listeners
+        removeKeyListener('e', expandButton.getCommand());
+        removeKeyListener('c', contractButton.getCommand());
+        removeKeyListener('s', scoreButton.getCommand());
+        removeKeyListener('r', moveRightButton.getCommand());
+        removeKeyListener('l', moveLeftButton.getCommand());
+        removeKeyListener('u', moveUpButton.getCommand());
+        removeKeyListener('d', moveDownButton.getCommand());
+        removeKeyListener('o', jumpToAstronautButton.getCommand());
+        removeKeyListener('a', jumpToAlienButton.getCommand());
+        pauseButton.setText("Play"); // Change the text to "Play" when paused
+    }
+
+    /**
+     * Enables all game-related buttons.
+     */
+    private void enableButtons() {
+        for (Button b : pausedButtonVector) {
+            b.setEnabled(true);
+            styleButton(b);
+        }
+     // Key Bindings and Listeners
+        addKeyListener('e', expandButton.getCommand());
+        addKeyListener('c', contractButton.getCommand());
+        addKeyListener('s', scoreButton.getCommand());
+        addKeyListener('r', moveRightButton.getCommand());
+        addKeyListener('l', moveLeftButton.getCommand());
+        addKeyListener('u', moveUpButton.getCommand());
+        addKeyListener('d', moveDownButton.getCommand());
+        addKeyListener('o', jumpToAstronautButton.getCommand());
+        addKeyListener('a', jumpToAlienButton.getCommand());
+        pauseButton.setText("Pause"); // Change the text to "Pause" when played
+    }
 
 	@Override
 	public void run() {
 		mv.repaint();
+		if(gw.isPaused()) {
+			disableButtons();
+		} else {
+			enableButtons();
+		}
 	}
 }
