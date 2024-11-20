@@ -1,14 +1,15 @@
-package com.mycompany.a2;
+package com.mycompany.a3;
 
 import com.codename1.charts.models.Point;
 import com.codename1.charts.util.ColorUtil;
+import com.codename1.ui.Graphics;
 
 /**
  * The GameObject class serves as a base class for all objects in the game world.
  * It provides basic properties such as size, location, and color, along with 
  * methods to access and modify these properties.
  */
-public abstract class GameObject {
+public abstract class GameObject implements IDrawable, ICollider{
     protected int size;     // Size of the game object
     protected Point point;  // Location (x, y) of the game object
     protected int color;    // Color of the game object
@@ -129,5 +130,49 @@ public abstract class GameObject {
                Math.round(point.getY() * 10.0) / 10.0 + " color=[" +
                ColorUtil.red(color) + "," + ColorUtil.green(color) + ", " +
                ColorUtil.blue(color) + "] size=" + size;
+    }
+    
+    /**
+     * Checks if this GameObject collides with another GameObject using bounding box collision detection.
+     * The method calculates the bounding boxes of both objects and determines if they overlap.
+     *
+     * @param otherObject The other GameObject to check for collision with this object.
+     * @return true if this GameObject collides with the other GameObject, false otherwise.
+     */
+    @Override
+    public boolean collidesWith(GameObject otherObject) {
+        // Initialize the result as false (no collision by default)
+        boolean result = false;
+
+        // Bounding box for this object
+        int thisRightX = (int) (this.getX() + this.size);   // Right X boundary of this object
+        int thisLeftX = (int) (this.getX());                // Left X boundary of this object
+        int thisTopY = (int) (this.getY());                 // Top Y boundary of this object
+        int thisBottomY = (int) (this.getY() + this.size);  // Bottom Y boundary of this object
+
+        // Bounding box for the other object
+        int otherRightX = (int) (otherObject.getX() + otherObject.size); // Right X boundary of other object
+        int otherLeftX = (int) (otherObject.getX());                     // Left X boundary of other object
+        int otherTopY = (int) (otherObject.getY());                      // Top Y boundary of other object
+        int otherBottomY = (int) (otherObject.getY() + otherObject.size);// Bottom Y boundary of other object
+
+        /**
+         * Check for overlap between the bounding boxes:
+         * - No overlap (no collision) occurs if:
+         *   1. This object's right side is left of the other object's left side.
+         *   2. This object's left side is right of the other object's right side.
+         *   3. This object's bottom side is above the other object's top side.
+         *   4. This object's top side is below the other object's bottom side.
+         *
+         * If any of these conditions are true, there is no collision.
+         * Using the negation of these conditions, we determine if there is an overlap (collision).
+         */
+        result = !(thisRightX < otherLeftX || 
+                   thisLeftX > otherRightX || 
+                   thisBottomY < otherTopY || 
+                   thisTopY > otherBottomY);
+
+        // Return the result of the collision check
+        return result;
     }
 }

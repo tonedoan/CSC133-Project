@@ -1,4 +1,4 @@
-package com.mycompany.a2;
+package com.mycompany.a3;
 
 import java.util.Random;
 import com.codename1.charts.models.Point;
@@ -9,7 +9,7 @@ import java.util.Observable;
 import java.util.Observer;
 
 
-public class GameWorld extends Observable {
+public class GameWorld extends Observable implements ICollider {
 	private int clock;
 	private int score;
 	private int astronautRes;
@@ -20,11 +20,20 @@ public class GameWorld extends Observable {
 	private int maxHeight;
 	private int movingCount = 0; // Track number of moving objects
     private int totalMovingObjects = 0; // Total number of moving objects
+    private int timerSec = 20; // Sets timer to 20 milliseconds, can be changed.
+	private int timerCount = 0;
 	private boolean sound = false;
 	private ArrayList<Observer> observers = new ArrayList<>();
 	private GameObjectCollection gameObjects = new GameObjectCollection();
 	private Spaceship spaceship;
 	Random rand = new Random();
+	private Alien lastCreatedAlien;
+	private int flagTimer = 0;
+    private BGSound bgSound;
+	private Sound astroAlien, alienAlien;
+	Sound scoreSound;
+    private boolean isPaused; // To track whether the game is paused
+
 	
 	/**
      * Initializes the game world with a spaceship, 4 astronauts, and 3 aliens.
@@ -37,9 +46,40 @@ public class GameWorld extends Observable {
 			gameObjects.add(new Astronaut(maxWidth, maxHeight, this));
 		}
 		for(int i = 0; i < 3; i++) { 
-			gameObjects.add(new Alien(maxWidth, maxHeight, this));
+			Alien alien = new Alien(maxWidth, maxHeight, this);
+			gameObjects.add(alien);
+			parentSetSpawn(alien); // To allow first Aliens to spawn
 		}
 		gameStateChanged();
+
+	}
+	
+	public void togglePause() {
+        isPaused = !isPaused; // Toggle the pause state
+
+        if (isPaused) {
+            bgSound.pause();  // Stop background sound when paused
+        } else {
+        	// Only play background sound if sound is enabled
+            if (getSound()) {
+                bgSound.play();   // Restart background sound when resumed
+            }
+        }
+    }
+	
+	
+	public boolean isPaused() {
+		return isPaused;
+	}
+	/**
+	 * Sets the canSpawn flag to true for a specific alien.
+	 * 
+	 * @param alien The alien for which to set the canSpawn flag.
+	 */
+	public void parentSetSpawn(Alien alien) {
+	    if (alien != null) {
+	        alien.setSpawn(true); // Enable spawning for this alien
+	    }
 	}
 	
 	/**
@@ -155,7 +195,7 @@ public class GameWorld extends Observable {
 		System.out.println("Jumping to random alien.");
         Alien alien = (Alien) getRandomAlien();
         if (alien != null) {
-            spaceship.setPoint(alien.getPoint());
+            spaceship.jumpToLocation(alien.getPoint());
         }
 		gameStateChanged();
     }
@@ -167,7 +207,7 @@ public class GameWorld extends Observable {
 		System.out.println("Jumping to random astronaut.");
         Astronaut astronaut = (Astronaut) getRandomAstro();
         if (astronaut != null) {
-            spaceship.setPoint(astronaut.getPoint());
+            spaceship.jumpToLocation(astronaut.getPoint());
         }
 		gameStateChanged();
     }
@@ -230,16 +270,17 @@ public class GameWorld extends Observable {
 	
 	/**
      * Prints the state of all game objects in the world.
+     * No Longer needed for this Assignment
      */
-	public void map() {
-		IIterator goi = gameObjects.getIterator();
-        GameObject curr = null;
-        
-        while(goi.hasNext()) {
-        	curr = goi.getNext();
-        	System.out.println(curr.toString());
-        }
-	}
+//	public void map() {
+//		IIterator goi = gameObjects.getIterator();
+//        GameObject curr = null;
+//        
+//        while(goi.hasNext()) {
+//        	curr = goi.getNext();
+//        	System.out.println(curr.toString());
+//        }
+//	}
 
 	/**
      * Counts the remaining astronauts or aliens based on the type.
@@ -269,23 +310,122 @@ public class GameWorld extends Observable {
 		}
 	}
 	
-	/**
-     * Advances the game clock and moves all moving objects in the world.
-     */
-	public void gameTick() {
-		prepareForNextTick();
-		System.out.println("Clock has ticked.");
-		this.clock += 1;
-		IIterator goi = gameObjects.getIterator();
-        GameObject curr = null;
-        
-        while(goi.hasNext()) {
-        	curr = goi.getNext();
-        	if(curr instanceof IMoving) {
-				IMoving mObj = (IMoving) curr;
-				mObj.move();
-			}
+	public void gameTick(int timerSec) {
+		if (isPaused) {
+            return;  // Skip game logic if the game is paused
         }
+		
+	    prepareForNextTick();
+	    
+	    timerCount += timerSec;
+	    if (timerCount >= 1000) { // To account for overflow
+	        this.clock += 1; // Clock is updated per second now dependent on the timerSec.
+	        timerCount = 0;
+	    }
+	    
+	    // Move all moving objects in the world
+	    IIterator goi = gameObjects.getIterator();
+	    GameObject curr = null;
+	    
+	    while(goi.hasNext()) {
+	        curr = goi.getNext();
+	        if(curr instanceof IMoving) {
+	            IMoving mObj = (IMoving) curr;
+	            mObj.move(timerSec); // Move each object based on the time passed
+	        }
+	    }
+	    collisionCheck();
+	    resetFlags();
+	    if(getSound()) {
+			bgSound.play();
+		}
+	}
+	
+	public void resetFlags() {
+		// Once certain time has passed remove aliens from Vectors to allow spawning again.
+	    IIterator goi1 = gameObjects.getIterator();
+	    GameObject curr1 = null;
+	    flagTimer += timerSec;
+	    if(flagTimer >= 20000) {
+	    	while(goi1.hasNext()) {
+		        curr1 = goi1.getNext();
+		        if(curr1 instanceof Alien) {
+		            ((Alien) curr1).setSpawn(true);	// Set spawn to true after certain time elapsed.
+		        }
+		        if(curr1 instanceof Astronaut) {	// Set vulnerable to true after certain time elapsed.
+		            ((Astronaut) curr1).setVul(true);
+		        }
+		    }
+	    	flagTimer = 0;
+	    }
+	}
+	
+	/**
+	 * When aliens collide with astronaut run this method
+	 */
+	public void attack(Astronaut victim) {
+		Sound sound = getAstroAlienSound();
+		if (victim != null) {
+	        // Decrease the health and speed of the victim astronaut
+			if (sound != null) {
+			    sound.play();
+			} else {
+			    System.out.println("AstroAlien sound is null");
+			}
+	        victim.setHealth(victim.getHealth() - 1);
+	        victim.setSpeed(victim.getSpeed() - 1);
+	        victim.fadeColor();  // Assuming fadeColor is a visual effect when attacked
+
+	        gameStateChanged();  // Notify that the game state has changed
+	    } else {
+	        System.out.println("Victim astronaut is null.");
+	    }
+	}
+
+	public void collisionCheck() {
+		// Collision detection pass
+		IIterator iter1 = gameObjects.getIterator();
+		while (iter1.hasNext()) {
+		    GameObject obj1 = iter1.getNext();
+
+		    IIterator iter2 = gameObjects.getIterator();
+		    while (iter2.hasNext()) {
+		        GameObject obj2 = iter2.getNext();
+		        // Skip collision checks with itself
+	            if (obj1 != obj2 && obj1.collidesWith(obj2)) {
+	                obj1.handleCollision(obj2);
+	            }
+		    }
+		}
+	    gameStateChanged();
+	}
+	
+	
+	/**
+	 * Attempts to create a new alien at it's parent location if there are at least two aliens in the world.
+	 */
+	public void spawnBabyAlien(Alien parent) {
+		int alienCount = countObj("a");
+		if(alienCount > 2 && alienCount < 30) {
+		    // Use the parent's location (or any other logic you prefer) to spawn the new alien
+		    Point parentPosition = parent.getPoint();
+		    
+		    // Create a new alien with the same world dimensions as the parent
+		    Alien babyAlien = new Alien(maxWidth, maxHeight, this);
+		    
+		    // Set the baby's position to the parent's position (or nearby)
+		    babyAlien.setX(parentPosition.getX() + rand.nextInt(3) - 1);  // Adjusting x slightly
+		    babyAlien.setY(parentPosition.getY() + rand.nextInt(3) - 1);  // Adjusting y slightly
+		    
+		    // Add the new baby alien to the game world
+		    gameObjects.add(babyAlien);
+		    
+		    // Save a reference to the last created alien, if needed
+		    lastCreatedAlien = babyAlien;
+		    
+		    // Trigger game state update
+		    gameStateChanged();
+		}
 	}
 	
 	/**
@@ -293,17 +433,18 @@ public class GameWorld extends Observable {
      * Updates the score and removes rescued or captured objects from the game world.
      */
 	public void openDoor() {
-	    System.out.println("Spaceship doors opening...");
+		Sound sound = getAlienAlienSound();
 	    
 	    float spaceshipX = spaceship.getX();
 	    float spaceshipY = spaceship.getY();
 	    float spaceshipSize = spaceship.getSize();
 
 	    // Define boundaries based on spaceship position and size
-	    float boundLeft = spaceshipX;
-	    float boundBottom = spaceshipY;
-	    float boundRight = spaceshipX + spaceshipSize;
-	    float boundTop = spaceshipY + spaceshipSize;
+	    float halfSize = spaceshipSize / 2;
+	    float boundLeft = spaceshipX - halfSize;
+	    float boundRight = spaceshipX + halfSize;
+	    float boundBottom = spaceshipY - halfSize;
+	    float boundTop = spaceshipY + halfSize;
 
 	    IIterator goi = gameObjects.getIterator();
 	    GameObject curr;
@@ -317,6 +458,11 @@ public class GameWorld extends Observable {
 	        if (boundLeft <= objX && boundRight >= objX && boundBottom <= objY && boundTop >= objY) {
 	            if (curr instanceof Astronaut) {
 	                Astronaut a = (Astronaut) curr;
+	                if(sound != null) {
+	                	sound.play();
+	                } else {
+	                	System.out.print("Score sound is null.");
+	                }
 	                score += a.getHealth() * 10; // Update score based on astronaut health
 	                astronautRes += 1; // Increment rescued astronaut count
 		            goi.remove(); // Remove the current object from the game world
@@ -338,87 +484,10 @@ public class GameWorld extends Observable {
 	}
 
 
-	/**
-     * Attempts to create a new alien at a random position if there are at least two aliens in the world.
-     */
-	public void alienClone() {
-		ArrayList<Alien> aliens = new ArrayList<>();
-		IIterator goi = gameObjects.getIterator();
-        GameObject curr = null;
-        
-        while(goi.hasNext()) {
-        	curr = goi.getNext();
-        	if(curr instanceof Alien) {
-                aliens.add((Alien) curr);
-            }
-        }
-        if(aliens.size() >= 2) {
-			Point nearbyPoint = getRandomAlien().getPoint();
-			Alien babyAlien = new Alien(maxWidth, maxHeight, this);
-			int randomPos = rand.nextInt(1);
-			if(randomPos == 0) {
-				randomPos = 5;
-			} else {
-				randomPos = -5;
-			}
-			babyAlien.setX(nearbyPoint.getX() + randomPos);
-			babyAlien.setY(nearbyPoint.getY() + randomPos);
-			gameObjects.add(babyAlien);
-			System.out.println("Another alien appeared!");
-			gameStateChanged();
-		} else {
-			System.out.println("Alien count less than 2. No aliens created.");
-		}
+	public Alien getLastAlien() {
+		return lastCreatedAlien;
 	}
 	
-	/**
-     * Mimics the attempt for whether an astronaut is attacked by an alien and 
-     * decreases health and speed 
-     */
-	public void attack() {
-	    ArrayList<Astronaut> astronauts = new ArrayList<>();
-	    IIterator goi = gameObjects.getIterator();
-	    GameObject curr = null;
-
-	    // Collect all astronauts
-	    while (goi.hasNext()) {
-	        curr = goi.getNext();
-	        if (curr instanceof Astronaut) {
-	            astronauts.add((Astronaut) curr);
-	        }
-	    }
-	    
-	    if (!astronauts.isEmpty()) {
-	        System.out.println("Astronaut getting attacked.");
-	        
-	        // Filter astronauts with health greater than 0
-	        ArrayList<Astronaut> aliveAstronauts = new ArrayList<>();
-	        for (Astronaut astronaut : astronauts) {
-	            if (astronaut.getHealth() > 0) {
-	                aliveAstronauts.add(astronaut);
-	            }
-	        }
-
-	        // Check if there are any astronauts left with health > 0
-	        if (!aliveAstronauts.isEmpty()) {
-	            int randomIndex = rand.nextInt(aliveAstronauts.size());
-	            Astronaut selectedAstronaut = aliveAstronauts.get(randomIndex);
-
-	            // Decrease the health and speed of the selected astronaut
-	            selectedAstronaut.setHealth(selectedAstronaut.getHealth() - 1);
-	            selectedAstronaut.setSpeed(selectedAstronaut.getSpeed() - 1);
-	            selectedAstronaut.fadeColor();
-
-	            gameStateChanged();
-	        } else {
-	            System.out.println("No astronauts available.");
-	        }
-	    } else {
-	        System.out.println("No astronauts available.");
-	    }
-	}
-
-
 	/**
 	 * Removes an observer from the list of observers.
 	 *
@@ -467,6 +536,11 @@ public class GameWorld extends Observable {
 	 */
 	public void toggleSound() {
 	    sound = !sound;
+	    if(sound) {
+	    	bgSound.play();
+	    } else {
+	    	bgSound.pause();
+	    }
 	    gameStateChanged();
 	}
 
@@ -504,6 +578,15 @@ public class GameWorld extends Observable {
 	 */
 	public int getHeight() {
 	    return maxHeight;
+	}
+	
+	
+	/**
+	 * Gets the gameObjectsCollection
+	 * @return the gameObjectsCollection
+	 */
+	public GameObjectCollection getGameObjects() {
+		return gameObjects;
 	}
 	
 	/**
@@ -544,4 +627,48 @@ public class GameWorld extends Observable {
         movingCount = 0; // Reset the moving count for the next tick
     }
 
+	public int getTimerSec() {
+		return timerSec;
+	}
+	
+	public void createSounds() {
+        bgSound = new BGSound("music.mp3");
+        //astroAlien = new Sound("Collide.mp3"); // Need to use another mp3 file 
+        //alienAlien = new Sound("Alien.mp3"); // Need to use another mp3 file
+        scoreSound = new Sound("zoop.mp3");
+    }
+	
+	// Getters for the sound objects, to access the specific sounds
+    public BGSound getBgSound() {
+        return bgSound;
+    }
+
+    public Sound getAstroAlienSound() {
+        return astroAlien;
+    }
+
+    public Sound getAlienAlienSound() {
+        return alienAlien;
+    }
+
+    public Sound getScoreSound() {
+        return scoreSound;
+    }
+
+	@Override
+	public boolean collidesWith(GameObject otherObject) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void handleCollision(GameObject otherObject) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void heal() {
+		// TODO Auto-generated method stub
+		
+	}
 }

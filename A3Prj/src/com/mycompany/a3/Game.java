@@ -1,9 +1,11 @@
-package com.mycompany.a2;
+package com.mycompany.a3;
 
 import com.codename1.ui.layouts.BorderLayout;
 import com.codename1.ui.layouts.BoxLayout;
 import com.codename1.ui.layouts.FlowLayout;
 import com.codename1.ui.plaf.Border;
+import com.codename1.ui.util.UITimer;
+
 import java.util.Vector;
 import com.codename1.charts.util.ColorUtil;
 import com.codename1.ui.Button;
@@ -12,19 +14,19 @@ import com.codename1.ui.Command;
 import com.codename1.ui.Component;
 import com.codename1.ui.Container;
 import com.codename1.ui.Form;
-import com.codename1.ui.Label;
 import com.codename1.ui.Toolbar; 
 
 /**
  * The Game class represents the main game interface, managing the layout and controls.
  * It initializes the GameWorld, MapView, and ScoreView, and sets up the user interface.
  */
-public class Game extends Form {
+public class Game extends Form  implements Runnable{
     private GameWorld gw;    // The game world instance
     private MapView mv;      // The map view instance
     private ScoreView sv;    // The score view instance
     private int maxWidth;    // Maximum width for the game area
     private int maxHeight;   // Maximum height for the game area
+    private int timerSec;
     private Vector<Button> buttonVector = new Vector<>(); // Vector to hold buttons
     
     /**
@@ -34,8 +36,9 @@ public class Game extends Form {
         gw = new GameWorld();
         mv = new MapView(gw);
         sv = new ScoreView(gw);
-        gw.addObserver(mv);
         gw.addObserver(sv);
+        gw.addObserver(mv);
+
         
         this.setLayout(new BorderLayout());
         Container mainContainer = new Container();
@@ -46,7 +49,6 @@ public class Game extends Form {
         Container southContainer = new Container(new FlowLayout(CENTER));
         Container westContainer = new Container(new BoxLayout(BoxLayout.Y_AXIS));
         Container eastContainer = new Container(new BoxLayout(BoxLayout.Y_AXIS));
-        Container centerContainer = new Container();
         
         // Create buttons and associate commands
         Button jumpToAstronautButton = new Button(new JumpToRandomAstronaut(gw));
@@ -60,19 +62,20 @@ public class Game extends Form {
         Button moveDownButton = new Button(new MoveDown(gw));
         Button contractButton = new Button(new Contract(gw));
         
-        Button newAlienButton = new Button(new NewAlien(gw));
-        Button fightButton = new Button(new Fight(gw));
-        Button tickButton = new Button(new Tick(gw));
+        Button healButton = new Button(new Heal(gw));
+        Button pauseButton = new Button("Pause");
+        Pause pauseCommand = new Pause(gw, pauseButton);
+        pauseButton.setCommand(pauseCommand);
+
         
         // Style center container for MapView
-        centerContainer.getAllStyles().setBorder(Border.createLineBorder(4, ColorUtil.rgb(255,0,0)));
+        mv.getAllStyles().setBorder(Border.createLineBorder(4, ColorUtil.rgb(255,0,0)));
         
         // Add components to their respective containers
-        centerContainer.add(mv);
+        
         northContainer.add(BorderLayout.NORTH, sv); // Add ScoreView to the north section
-        southContainer.add(newAlienButton);
-        southContainer.add(fightButton);
-        southContainer.add(tickButton);
+        southContainer.add(healButton);
+        southContainer.add(pauseButton);
         
         westContainer.add(expandButton);
         westContainer.add(moveUpButton);
@@ -95,16 +98,17 @@ public class Game extends Form {
         buttonVector.add(jumpToAstronautButton);
         buttonVector.add(jumpToAlienButton);
         buttonVector.add(scoreButton);
-        buttonVector.add(newAlienButton);
-        buttonVector.add(fightButton);
-        buttonVector.add(tickButton);
+        buttonVector.add(healButton);
+        buttonVector.add(pauseButton);
         
         for (Button b : buttonVector) {
             styleButton(b);
         }
+        pauseButton.getAllStyles().setPadding(Component.LEFT, 5);
+        pauseButton.getAllStyles().setPadding(Component.RIGHT, 5);
 
         // Assemble the main layout
-        mainContainer.add(BorderLayout.CENTER, centerContainer);
+        mainContainer.add(BorderLayout.CENTER, mv);
         mainContainer.add(BorderLayout.NORTH, northContainer);
         mainContainer.add(BorderLayout.SOUTH, southContainer);
         mainContainer.add(BorderLayout.WEST, westContainer);
@@ -120,7 +124,7 @@ public class Game extends Form {
         CheckBox sound = new CheckBox();
         sound.getAllStyles().setBgTransparency(255);
         sound.getAllStyles().setBgColor(ColorUtil.LTGRAY);
-        Command soundBox = new Sound(gw);
+        Command soundBox = new soundCheck(gw);
         Command about = new About();
         
         toolbar.setTitle("The Rescue Game");
@@ -142,18 +146,23 @@ public class Game extends Form {
         addKeyListener('d', moveDownButton.getCommand());
         addKeyListener('o', jumpToAstronautButton.getCommand());
         addKeyListener('a', jumpToAlienButton.getCommand());
-        addKeyListener('w', newAlienButton.getCommand());
-        addKeyListener('f', fightButton.getCommand());
-        addKeyListener('t', tickButton.getCommand());
+        addKeyListener('w', healButton.getCommand());
+        addKeyListener('f', pauseButton.getCommand());
         addKeyListener('x', quit);
         
         // Show the game form
         this.show();
-        maxWidth = centerContainer.getWidth();
-        maxHeight = centerContainer.getHeight();
+        maxWidth = mv.getWidth();
+        maxHeight = mv.getHeight();
         gw.setHeight(maxHeight);
         gw.setWidth(maxWidth);
         gw.init();
+        gw.createSounds();
+        revalidate();
+        this.timerSec = gw.getTimerSec();
+        UITimer timer = new UITimer(this);
+        timer.schedule(timerSec, true, this);
+        
     }
     
     /**
@@ -169,4 +178,9 @@ public class Game extends Form {
         button.getAllStyles().setPadding(Component.BOTTOM, 5);
         button.getAllStyles().setBorder(Border.createLineBorder(2, ColorUtil.GRAY));
     }
+
+	@Override
+	public void run() {
+		mv.repaint();
+	}
 }

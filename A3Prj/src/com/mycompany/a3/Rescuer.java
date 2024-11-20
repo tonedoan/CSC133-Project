@@ -1,4 +1,6 @@
-package com.mycompany.a2;
+package com.mycompany.a3;
+
+import com.codename1.charts.models.Point;
 
 public abstract class Rescuer extends GameObject implements IGuided {
 	/**
@@ -34,7 +36,11 @@ public abstract class Rescuer extends GameObject implements IGuided {
      * @param point this.point is set to the point of object.
      */
     @Override
-    public void jumpToLocation() {
-    	// Need to implement this.
+    public void jumpToLocation(Point target) {
+    	float defaultX = target.getX();
+    	float defaultY = target.getY();
+    	
+    	setX(defaultX);
+    	setY(defaultY);
     }
 }

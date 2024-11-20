@@ -1,4 +1,4 @@
-package com.mycompany.a2;
+package com.mycompany.a3;
 
 import com.codename1.ui.Button;
 import com.codename1.ui.Command;
@@ -42,7 +42,6 @@ public class Help extends Command {
                 + "d - Move spaceship down\n"
                 + "e - Expand spaceship\n"
                 + "c - Contract spaceship\n"
-                + "t - Advance game time\n"
                 + "s - Open door\n"
                 + "w - Create new alien\n"
                 + "f - Attack\n");

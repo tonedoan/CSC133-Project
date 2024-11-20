@@ -1,4 +1,4 @@
-package com.mycompany.a2;
+package com.mycompany.a3;
 
 /**
  * Represents a collection of game objects that can be iterated over.

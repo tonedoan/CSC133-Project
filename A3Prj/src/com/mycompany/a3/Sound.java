@@ -1,33 +1,60 @@
-package com.mycompany.a2;
+package com.mycompany.a3;
 
-import com.codename1.ui.Command;
-import com.codename1.ui.events.ActionEvent;
+import java.io.InputStream;
+
+import com.codename1.media.Media;
+import com.codename1.media.MediaManager;
+import com.codename1.ui.Display;
 
 /**
  * The Sound class is a command that interacts with the GameWorld to toggle sound settings.
- * It extends the Command class to define a specific action for sound control.
+ * It provides methods to play and pause the sound when triggered.
  */
-public class Sound extends Command {
-    private GameWorld gw;
+public class Sound {
+    private Media m;
 
     /**
-     * Constructs a Sound command with the specified GameWorld.
+     * Constructs a Sound command with the specified file name.
      *
-     * @param gw the GameWorld instance that this command interacts with
+     * @param fileName the name of the audio file to be played
      */
-    public Sound(GameWorld gw) {
-        super("Sound");
-        this.gw = gw;
+    public Sound(String fileName) {
+    	while (m == null) {
+			try {
+				InputStream is = Display.getInstance().getResourceAsStream(getClass(), "/" + fileName);
+				m = MediaManager.createMedia(is, "audio/mp3");
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
     }
 
     /**
-     * Executes the action associated with this command.
-     * Toggles the sound status in the GameWorld when triggered.
-     *
-     * @param evt the ActionEvent triggered by the command
+     * Plays the sound if it is properly initialized.
      */
-    @Override
-    public void actionPerformed(ActionEvent evt) {
-        gw.toggleSound();
+    public void play() {
+        if (m != null) {
+            m.play();
+        } else {
+            System.err.println("Media not loaded.");
+        }
+    }
+
+    /**
+     * Pauses the sound if it is currently playing.
+     */
+    public void pause() {
+        if (m != null) {
+            m.pause();
+        }
+    }
+
+    /**
+     * Gets the media object representing the sound.
+     *
+     * @return the Media object
+     */
+    public Media getMedia() {
+        return m;
     }
 }

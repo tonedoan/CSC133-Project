@@ -1,4 +1,4 @@
-package com.mycompany.a2;
+package com.mycompany.a3;
 
 /**
  * Represents an iterator for traversing a collection of GameObject instances.

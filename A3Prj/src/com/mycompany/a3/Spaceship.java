@@ -1,8 +1,9 @@
-package com.mycompany.a2;
+package com.mycompany.a3;
 
 import java.util.Random;
 import com.codename1.charts.models.Point;
 import com.codename1.charts.util.ColorUtil;
+import com.codename1.ui.Graphics;
 
 /**
  * The Spaceship class represents a guided spaceship object in the game world.
@@ -82,6 +83,7 @@ public class Spaceship extends Rescuer {
         this.size = size;
     }
     
+    
     /** 
      * Overrides the setColor() method from the GameObject class.
      * This method does nothing since the color of the spaceship does not change.
@@ -92,4 +94,33 @@ public class Spaceship extends Rescuer {
     public void setColor(int color) {
         // No operation: Spaceship colors do not change
     }
+    
+    /**
+     * Draws a Spaceship shape in the container.
+     * Spaceship is a circle.
+     * @param g is what is going to be drawn
+     * @param pCmpRelPrnt is the location of where it will be drawn
+     */
+    @Override
+    public void draw(Graphics g, Point pCmpRelPrnt) {
+    	// Set the color for the spaceship
+        g.setColor(color);
+
+        // Adjust the position to ensure the circle is drawn with its center at (pCmpRelPrnt)
+        int x = (int)(pCmpRelPrnt.getX() - size / 2); // X-coordinate for the upper-left corner
+        int y = (int)(pCmpRelPrnt.getY() - size / 2); // Y-coordinate for the upper-left corner
+
+        // Draw and fill the circle (arc with 360 degree sweep for a full circle)
+        g.fillArc(x, y, size, size, 0, 360);
+    }
+
+	@Override
+	public void jumpToLocation() {
+		// TODO
+	}
+
+	@Override
+	public void handleCollision(GameObject otherObject) {
+		// TODO Auto-generated method stub
+	}
 }

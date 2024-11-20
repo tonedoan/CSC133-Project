@@ -1,4 +1,4 @@
-package com.mycompany.a2;
+package com.mycompany.a3;
 
 import java.util.Random;
 
@@ -6,7 +6,17 @@ public abstract class Opponent extends GameObject implements IMoving{
 	protected GameWorld gw;
 	protected int direction;
 	protected int speed;
-    protected final int constant = 1;
+	protected int count;
+	protected boolean result;
+	protected int thisRightX;
+	protected int thisLeftX;
+	protected int thisTopY;
+	protected int thisBottomY;
+	protected int otherRightX;
+	protected int otherLeftX;
+	protected int otherTopY;
+	protected int otherBottomY;
+    protected final int constant = 10; // Use this to adjust speed of astronauts
     Random rand = new Random();
     protected boolean hasMoved;
 
@@ -29,12 +39,21 @@ public abstract class Opponent extends GameObject implements IMoving{
     /**
      * Moves the opponent based on its current speed and direction.
      * Updates the opponent's position by calculating the change in x and y coordinates.
+     * @param timerSec passes the timer's millisecond
      */
-    public void move() {
+    public void move(int timerSec) {
+    	// Check if the opponent should move (speed should be greater than 0)
+        if (speed <= 0) {
+            return;  // If speed is 0, stop movement and exit the method
+        }
         double theta = 90 - direction;
         double thetaRadians = Math.toRadians(theta);
-        double deltaX = Math.cos(thetaRadians) * speed;
-        double deltaY = Math.sin(thetaRadians) * speed;
+        double deltaX = Math.cos(thetaRadians) * speed * (timerSec/1000.0); 
+        double deltaY = Math.sin(thetaRadians) * speed * (timerSec/1000.0);
+        
+        if (rand.nextInt(100) < 10) { // 10% chance to change direction
+            direction += rand.nextInt(30) - 15; // Random change between -15 and +15 degrees
+        }
 
         // Update position
         float newX = point.getX() + (float) deltaX;
@@ -61,14 +80,6 @@ public abstract class Opponent extends GameObject implements IMoving{
         point.setX(newX);
         point.setY(newY);
 
-        // Randomly adjust the direction
-        int addSub = rand.nextInt(2); // Changed to 2 to allow equal chance of +5 or -5
-        if (addSub == 1) {
-            this.direction += 5;
-        } else {
-            this.direction -= 5;
-        }
-
         // Normalize the direction to keep it within 0-360 degrees
         if (this.direction >= 360) {
             this.direction -= 360;
@@ -77,6 +88,7 @@ public abstract class Opponent extends GameObject implements IMoving{
         }
         
         gw.notifyMovement();
+        count = 0;	// Reset count after the move
     }
 
     

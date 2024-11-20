@@ -1,4 +1,6 @@
-package com.mycompany.a2;
+package com.mycompany.a3;
+
+import com.codename1.charts.models.Point;
 
 /**
  * Represents an interface for guided entities that can move in various directions
@@ -30,4 +32,10 @@ public interface IGuided {
      * Makes the guided entity jump to a specific location.
      */
     void jumpToLocation();
+
+	/**
+	 * Placeholder method for jumping to a specific location.
+	 * @param point this.point is set to the point of object.
+	 */
+	void jumpToLocation(Point target);
 }
