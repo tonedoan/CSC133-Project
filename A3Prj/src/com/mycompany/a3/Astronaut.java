@@ -8,7 +8,7 @@ import com.codename1.ui.Graphics;
  * The Astronaut class represents an astronaut in the game world.
  * Astronauts have health, speed, and can move within the game world.
  */
-public class Astronaut extends Opponent {
+public class Astronaut extends Opponent implements ISelectable{
     private int health;
     private int blue;
     private int px, py, xLoc, yLoc;
@@ -122,6 +122,7 @@ public class Astronaut extends Opponent {
 
     	g.setColor(color);
 
+    	// if selected flag is true draw the filled polygon, vice versa. Also fills when game is unpaused.
         if(!isSelected() || !gw.isPaused()) {
         	g.fillPolygon(xPoints, yPoints, 3);
         } else {
@@ -132,6 +133,9 @@ public class Astronaut extends Opponent {
         }
     }
     
+    /**
+     * Overridden method on how to handle the collision between Alien and Astronaut
+     */
     @Override
     public void handleCollision(GameObject otherObject) {
     	if(otherObject instanceof Alien) {
@@ -142,50 +146,81 @@ public class Astronaut extends Opponent {
     	}
     }
     
+    /**
+     * Flag to set vulnerable to value
+     * @param value
+     */
     public void setVul(boolean value) {
     	this.vulnerable = value;
     }
 
-	@Override
-	public void setSelected(boolean b) {
-		selected = b;
-	}
+    /**
+     * Sets the selected state of the object.
+     *
+     * @param b true to select the object, false to deselect it
+     */
+    @Override
+    public void setSelected(boolean b) {
+        selected = b;
+    }
 
-	@Override
-	public boolean isSelected() {
-		return selected;
-	}
+    /**
+     * Checks if the object is currently selected.
+     *
+     * @return true if the object is selected, false otherwise
+     */
+    @Override
+    public boolean isSelected() {
+        return selected;
+    }
 
-	@Override
-	public boolean contains(Point pPtrRelPrnt, Point pCmpRelPrnt) {
-		px = (int) pPtrRelPrnt.getX();
-		py = (int) pPtrRelPrnt.getY();
-		xLoc = (int) pCmpRelPrnt.getX() + (int) point.getX() - size / 2;
-		yLoc = (int) pCmpRelPrnt.getY() + (int) point.getY() - size / 2;
-		// Calculate the three vertices of the triangle
-	    int x0 = xLoc, y0 = yLoc + size;
-	    int x1 = xLoc + size, y1 = yLoc + size;
-	    int x2 = xLoc + size / 2, y2 = yLoc;
+    /**
+     * Checks if the given point is inside the triangle.
+     *
+     * This method uses the area-based technique to determine if a point is inside a triangle.
+     * It calculates the total area of the triangle and the areas formed by the point and each side of the triangle.
+     * If the sum of the areas is equal to the total area of the triangle, the point lies inside.
+     *
+     * @param pPtrRelPrnt the point to check, relative to the parent
+     * @param pCmpRelPrnt the point relative to the component
+     * @return true if the point is inside the triangle, false otherwise
+     */
+    @Override
+    public boolean contains(Point pPtrRelPrnt, Point pCmpRelPrnt) {
+        // Get the x and y coordinates of the point to check
+        px = (int) pPtrRelPrnt.getX();
+        py = (int) pPtrRelPrnt.getY();
+        
+        // Calculate the location of the triangle relative to the component
+        xLoc = (int) pCmpRelPrnt.getX() + (int) point.getX() - size / 2;
+        yLoc = (int) pCmpRelPrnt.getY() + (int) point.getY() - size / 2;
+        
+        // Calculate the three vertices of the triangle
+        int x0 = xLoc, y0 = yLoc + size;
+        int x1 = xLoc + size, y1 = yLoc + size;
+        int x2 = xLoc + size / 2, y2 = yLoc;
+        
+        // Calculate the total area of the triangle
+        int area = Math.abs((x1 - x0) * (y2 - y0) - (x2 - x0) * (y1 - y0));
+        
+        // Calculate the areas formed by the point and each edge of the triangle
+        int area1 = Math.abs((px - x0) * (y1 - y0) - (x1 - x0) * (py - y0));
+        int area2 = Math.abs((px - x1) * (y2 - y1) - (x2 - x1) * (py - y1));
+        int area3 = Math.abs((px - x2) * (y0 - y2) - (x0 - x2) * (py - y2));
+        
+        // If the sum of the areas is equal to the total area, the point is inside the triangle
+        return area == (area1 + area2 + area3);
+    }
 
-	    // Check if the point is inside the triangle using the area method
-	    int area = Math.abs((x1 - x0) * (y2 - y0) - (x2 - x0) * (y1 - y0)); // Total area of the triangle
-	    int area1 = Math.abs((px - x0) * (y1 - y0) - (x1 - x0) * (py - y0)); // Area with point and edge (x0, y0) -> (x1, y1)
-	    int area2 = Math.abs((px - x1) * (y2 - y1) - (x2 - x1) * (py - y1)); // Area with point and edge (x1, y1) -> (x2, y2)
-	    int area3 = Math.abs((px - x2) * (y0 - y2) - (x0 - x2) * (py - y2)); // Area with point and edge (x2, y2) -> (x0, y0)
-
-	    // If the sum of the areas is equal to the total area, the point is inside the triangle
-	    if (area == (area1 + area2 + area3)) {
-	        return true;
-	    } else {
-	        return false;
-	    }
-	}
-
-	public void heal() {
-		if(gw.isPaused()) {
-			this.health = 5;
-	        this.color = ColorUtil.rgb(0, 0, blue);
-		}
-		
-	}
+    /**
+     * Heals the object if the game is paused.
+     * Sets the health to 5 and changes the color to a shade of blue.
+     */
+    public void heal() {
+        // Only heal if the game is paused
+        if (gw.isPaused()) {
+            this.health = 5;
+            this.color = ColorUtil.rgb(0, 0, blue); // Set the color to default blue shade
+        }
+    }
 }

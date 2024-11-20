@@ -29,22 +29,18 @@ public class Game extends Form  implements Runnable{
     private int timerSec;
     private Vector<Button> buttonVector = new Vector<>(); // Vector to hold buttons
     private Vector<Button> pausedButtonVector = new Vector<>(); // Vector to hold buttons
-	private boolean isPaused;
 	// Declare the buttons as class fields
 	private Button jumpToAstronautButton;
 	private Button moveLeftButton;
 	private Button moveUpButton;
 	private Button expandButton;
-
 	private Button scoreButton;
 	private Button jumpToAlienButton;
 	private Button moveRightButton;
 	private Button moveDownButton;
 	private Button contractButton;
-
 	private Button healButton;
 	private Button pauseButton;
-	private Pause pauseCommand;
 	private Command quit; 
 
     
@@ -117,6 +113,7 @@ public class Game extends Form  implements Runnable{
         buttonVector.add(healButton);
         buttonVector.add(pauseButton);
         
+        // Add buttons to vector used when enabling and disabling buttons
         pausedButtonVector.add(expandButton);
         pausedButtonVector.add(contractButton);
         pausedButtonVector.add(moveUpButton);
@@ -127,11 +124,10 @@ public class Game extends Form  implements Runnable{
         pausedButtonVector.add(jumpToAlienButton);
         pausedButtonVector.add(scoreButton);
         
+        // Used to style button
         for (Button b : buttonVector) {
             styleButton(b);
         }
-        pauseButton.getAllStyles().setPadding(Component.LEFT, 5);
-        pauseButton.getAllStyles().setPadding(Component.RIGHT, 5);
 
         // Assemble the main layout
         mainContainer.add(BorderLayout.CENTER, mv);
@@ -248,13 +244,24 @@ public class Game extends Form  implements Runnable{
         pauseButton.setText("Pause"); // Change the text to "Pause" when played
     }
 
-	@Override
-	public void run() {
-		mv.repaint();
-		if(gw.isPaused()) {
-			disableButtons();
-		} else {
-			enableButtons();
-		}
-	}
+    /**
+     * The run method is responsible for updating the game view and managing the state of game-related buttons.
+     * It checks if the game is paused and disables/enables buttons accordingly.
+     * It also repaints the game view.
+     */
+    @Override
+    public void run() {
+        // Repaint the map view to update the screen
+        mv.repaint();
+
+        // Check if the game is paused
+        if (gw.isPaused()) {
+            // If the game is paused, disable all relevant buttons
+            disableButtons();
+        } else {
+            // If the game is not paused, enable all relevant buttons
+            enableButtons();
+        }
+    }
+
 }

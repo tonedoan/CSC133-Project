@@ -4,7 +4,9 @@ import com.codename1.ui.Button;
 import com.codename1.ui.Command;
 import com.codename1.ui.events.ActionEvent;
 
-
+/**
+ * The Pause command pauses the world when 'f' button is pressed or when button is pressed.
+ */
 public class Pause extends Command {
     private GameWorld gw;
 

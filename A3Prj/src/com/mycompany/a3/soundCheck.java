@@ -3,6 +3,11 @@ package com.mycompany.a3;
 import com.codename1.ui.Command;
 import com.codename1.ui.events.ActionEvent;
 
+/**
+ * This class is used to create a checkbox in Game and toggles sound depending 
+ * on whether it is checked or not.
+ *
+ */
 public class soundCheck extends Command {
 	private GameWorld gw;
     

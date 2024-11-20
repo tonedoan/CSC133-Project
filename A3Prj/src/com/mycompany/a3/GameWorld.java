@@ -2,7 +2,6 @@ package com.mycompany.a3;
 
 import java.util.Random;
 import com.codename1.charts.models.Point;
-import com.codename1.ui.Button;
 import com.codename1.ui.Dialog;
 
 import java.util.ArrayList;
@@ -10,7 +9,7 @@ import java.util.Observable;
 import java.util.Observer;
 
 
-public class GameWorld extends Observable implements ICollider {
+public class GameWorld extends Observable {
 	private int clock;
 	private int score;
 	private int astronautRes;
@@ -54,23 +53,34 @@ public class GameWorld extends Observable implements ICollider {
 
 	}
 	
+	/**
+	 * Toggles the game's pause state.
+	 * If the game is paused, it will stop the background sound.
+	 * If the game is resumed, it will play the background sound, provided sound is enabled.
+	 */
 	public void togglePause() {
-        isPaused = !isPaused; // Toggle the pause state
+	    isPaused = !isPaused; // Toggle the pause state
 
-        if (isPaused) {
-            bgSound.pause();  // Stop background sound when paused
-        } else {
-        	// Only play background sound if sound is enabled
-            if (getSound()) {
-                bgSound.play();   // Restart background sound when resumed
-            }
-        }
-    }
-	
-	
-	public boolean isPaused() {
-		return isPaused;
+	    // If the game is paused, stop the background sound
+	    if (isPaused) {
+	        bgSound.pause();  // Stop background sound when paused
+	    } else {
+	        // Only play background sound if sound is enabled
+	        if (getSound()) {
+	            bgSound.play();   // Restart background sound when resumed
+	        }
+	    }
 	}
+
+	/**
+	 * Returns the current pause state of the game.
+	 *
+	 * @return true if the game is paused, false if the game is running
+	 */
+	public boolean isPaused() {
+	    return isPaused;
+	}
+	
 	/**
 	 * Sets the canSpawn flag to true for a specific alien.
 	 * 
@@ -310,13 +320,23 @@ public class GameWorld extends Observable implements ICollider {
 		}
 	}
 	
+	/**
+	 * Executes one game tick, updating game state based on the elapsed time.
+	 * This includes moving game objects, updating the clock, and checking for collisions.
+	 * If the game is paused, no game logic is processed.
+	 * 
+	 * @param timerSec the amount of time that has passed in seconds since the last tick
+	 */
 	public void gameTick(int timerSec) {
-		if (isPaused) {
-            return;  // Skip game logic if the game is paused
-        }
-		
+	    // If the game is paused, skip the game logic
+	    if (isPaused) {
+	        return;  // Skip game logic if the game is paused
+	    }
+	    
+	    // Prepare the game world for the next tick
 	    prepareForNextTick();
 	    
+	    // Update the clock and reset the timer count
 	    timerCount += timerSec;
 	    if (timerCount >= 1000) { // To account for overflow
 	        this.clock += 1; // Clock is updated per second now dependent on the timerSec.
@@ -327,6 +347,7 @@ public class GameWorld extends Observable implements ICollider {
 	    IIterator goi = gameObjects.getIterator();
 	    GameObject curr = null;
 	    
+	    // Iterate through all game objects and move those that implement the IMoving interface
 	    while(goi.hasNext()) {
 	        curr = goi.getNext();
 	        if(curr instanceof IMoving) {
@@ -334,29 +355,52 @@ public class GameWorld extends Observable implements ICollider {
 	            mObj.move(timerSec); // Move each object based on the time passed
 	        }
 	    }
+	    
+	    // Check for collisions between objects
 	    collisionCheck();
+	    
+	    // Reset any flags set during the tick
 	    resetFlags();
+	    
+	    // If sound is enabled, play background sound
 	    if(getSound()) {
-			bgSound.play();
-		}
+	        bgSound.play();
+	    }
 	}
 	
+	/**
+	 * Resets flags for certain game objects based on the elapsed time.
+	 * This includes enabling alien spawning and astronaut vulnerability after a certain period.
+	 * 
+	 * @param timerSec the amount of time that has passed in seconds since the last tick
+	 */
 	public void resetFlags() {
-		// Once certain time has passed remove aliens from Vectors to allow spawning again.
+	    // Iterate through game objects and update flags based on elapsed time
 	    IIterator goi1 = gameObjects.getIterator();
 	    GameObject curr1 = null;
+	    
+	    // Increment the flag timer by the elapsed time (timerSec)
 	    flagTimer += timerSec;
-	    if(flagTimer >= 20000) {
-	    	while(goi1.hasNext()) {
-		        curr1 = goi1.getNext();
-		        if(curr1 instanceof Alien) {
-		            ((Alien) curr1).setSpawn(true);	// Set spawn to true after certain time elapsed.
-		        }
-		        if(curr1 instanceof Astronaut) {	// Set vulnerable to true after certain time elapsed.
-		            ((Astronaut) curr1).setVul(true);
-		        }
-		    }
-	    	flagTimer = 0;
+	    
+	    // After 20 seconds, reset the flags for alien spawn and astronaut vulnerability
+	    if (flagTimer >= 20000) {
+	        // Loop through all game objects to update flags
+	        while(goi1.hasNext()) {
+	            curr1 = goi1.getNext();
+	            
+	            // Enable alien spawning after the time limit
+	            if(curr1 instanceof Alien) {
+	                ((Alien) curr1).setSpawn(true);  // Set spawn flag to true for aliens
+	            }
+	            
+	            // Set astronaut vulnerability after the time limit
+	            if(curr1 instanceof Astronaut) {
+	                ((Astronaut) curr1).setVul(true);  // Set vulnerable flag to true for astronauts
+	            }
+	        }
+	        
+	        // Reset the flag timer after the update
+	        flagTimer = 0;
 	    }
 	}
 	
@@ -370,11 +414,11 @@ public class GameWorld extends Observable implements ICollider {
 			if (sound != null) {
 			    sound.play();
 			} else {
-			    System.out.println("AstroAlien sound is null");
+			    System.out.println("AstroAlien sound is null"); // If sound doesn't init correctly, print to console.
 			}
 	        victim.setHealth(victim.getHealth() - 1);
 	        victim.setSpeed(victim.getSpeed() - 1);
-	        victim.fadeColor();  // Assuming fadeColor is a visual effect when attacked
+	        victim.fadeColor();  // Fade colors of astronaut to a lighter blue when attacked.
 
 	        gameStateChanged();  // Notify that the game state has changed
 	    } else {
@@ -382,24 +426,37 @@ public class GameWorld extends Observable implements ICollider {
 	    }
 	}
 
+	/**
+	 * Checks for collisions between game objects and handles them.
+	 * It iterates through all game objects and checks if any two objects collide. 
+	 * If a collision is detected, it calls the appropriate method to handle the collision.
+	 */
 	public void collisionCheck() {
-		// Collision detection pass
-		IIterator iter1 = gameObjects.getIterator();
-		while (iter1.hasNext()) {
-		    GameObject obj1 = iter1.getNext();
+	    // Begin collision detection pass through all game objects
+	    IIterator iter1 = gameObjects.getIterator();
+	    
+	    // Iterate through all objects in the game world
+	    while (iter1.hasNext()) {
+	        GameObject obj1 = iter1.getNext();
 
-		    IIterator iter2 = gameObjects.getIterator();
-		    while (iter2.hasNext()) {
-		        GameObject obj2 = iter2.getNext();
-		        // Skip collision checks with itself
+	        // Nested iterator to compare obj1 with all other objects
+	        IIterator iter2 = gameObjects.getIterator();
+	        
+	        // Check for collisions between obj1 and all other objects
+	        while (iter2.hasNext()) {
+	            GameObject obj2 = iter2.getNext();
+	            
+	            // Skip collision check if comparing the object with itself
 	            if (obj1 != obj2 && obj1.collidesWith(obj2)) {
+	                // Handle the collision if one is detected
 	                obj1.handleCollision(obj2);
 	            }
-		    }
-		}
+	        }
+	    }
+	    
+	    // Notify that the game state has changed after handling collisions
 	    gameStateChanged();
 	}
-	
 	
 	/**
 	 * Attempts to create a new alien at it's parent location if there are at least two aliens in the world.
@@ -485,9 +542,15 @@ public class GameWorld extends Observable implements ICollider {
 	}
 
 
+	/**
+	 * Returns the last created Alien object.
+	 * 
+	 * @return the last created Alien object
+	 */
 	public Alien getLastAlien() {
-		return lastCreatedAlien;
+	    return lastCreatedAlien;
 	}
+
 	
 	/**
 	 * Removes an observer from the list of observers.
@@ -632,12 +695,21 @@ public class GameWorld extends Observable implements ICollider {
 		return timerSec;
 	}
 	
+	/**
+	 * Creates and initializes background and other sound objects.
+	 * This method sets up the background sound for the game. 
+	 * Additional sounds (such as for collisions, score, etc.) can be added here.
+	 */
 	public void createSounds() {
-        bgSound = new BGSound("music.mp3");
-//        astroAlien = new Sound("boing.mp3"); // Inputstream not adding these sounds.
-//        alienAlien = new Sound("bang.mp3"); 
-//        scoreSound = new Sound("zoop.mp3");
-    }
+	    // Initialize the background sound with the provided file name
+	    bgSound = new BGSound("music.mp3");
+
+	    // Placeholder for other sounds; currently commented out due to InputStream issues.
+	    // astroAlien = new Sound("boing.mp3"); 
+	    // alienAlien = new Sound("bang.mp3"); 
+	    // scoreSound = new Sound("zoop.mp3");
+	}
+
 	
 	// Getters for the sound objects, to access the specific sounds
     public BGSound getBgSound() {
@@ -656,38 +728,31 @@ public class GameWorld extends Observable implements ICollider {
         return scoreSound;
     }
 
-	@Override
-	public boolean collidesWith(GameObject otherObject) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public void handleCollision(GameObject otherObject) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void heal() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public Astronaut getSelectedAstronaut() {
-	    IIterator goi = gameObjects.getIterator();  // Assuming gameObjects is the collection of GameObjects
-	    while(goi.hasNext()) {
-	        GameObject gameObject = goi.getNext();
-	        
-	        // Check if the object is an astronaut
-	        if (gameObject instanceof Astronaut) {
-	            Astronaut astronaut = (Astronaut) gameObject;
-	            
-	            // Return the astronaut if it's selected
-	            if (astronaut.isSelected()) {
-	                return astronaut;
-	            }
-	        }
-	    }
-	    return null;  // No selected astronaut found
-	}
+    /**
+     * Returns the currently selected astronaut from the game objects collection.
+     * It iterates over all game objects and checks if they are instances of Astronaut.
+     * If an astronaut is selected, it returns that astronaut; otherwise, it returns null.
+     * 
+     * @return the selected astronaut, or null if no astronaut is selected.
+     */
+    public Astronaut getSelectedAstronaut() {
+        // Iterate over all game objects in the collection
+        IIterator goi = gameObjects.getIterator();  // Assuming gameObjects is the collection of GameObjects
+        
+        while(goi.hasNext()) {
+            GameObject gameObject = goi.getNext();
+            
+            // Check if the current game object is an astronaut
+            if (gameObject instanceof Astronaut) {
+                Astronaut astronaut = (Astronaut) gameObject;
+                
+                // Return the astronaut if it is selected
+                if (astronaut.isSelected()) {
+                    return astronaut;
+                }
+            }
+        }
+        // Return null if no selected astronaut is found
+        return null;
+    }
 }

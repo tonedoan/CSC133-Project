@@ -34,7 +34,7 @@ public class About extends Command {
         // Create the help content (TextArea) with instructions or key mappings
         TextArea aboutText = new TextArea("Name: Tuan Doan\n"
                 + "Course Name: CSC133\n"
-                + "Assignment 2");
+                + "Assignment 3");
 
         // Set the TextArea to be non-editable and wrap text
         aboutText.setEditable(false);

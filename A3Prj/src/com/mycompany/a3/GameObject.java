@@ -9,7 +9,7 @@ import com.codename1.ui.Graphics;
  * It provides basic properties such as size, location, and color, along with 
  * methods to access and modify these properties.
  */
-public abstract class GameObject implements IDrawable, ICollider, ISelectable{
+public abstract class GameObject implements IDrawable, ICollider{
     protected int size;     // Size of the game object
     protected Point point;  // Location (x, y) of the game object
     protected int color;    // Color of the game object

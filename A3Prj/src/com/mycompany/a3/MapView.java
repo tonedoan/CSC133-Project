@@ -73,12 +73,23 @@ public class MapView extends Container implements Observer {
         }
     }
     
+    /**
+     * Handles the pointerPressed event, which is triggered when a user clicks on the screen.
+     * This method processes the click to check if it was on an astronaut and toggles the selection 
+     * state of the astronaut. If no astronaut was clicked, all astronauts are deselected.
+     *
+     * @param x the x-coordinate of the pointer in the MapView
+     * @param y the y-coordinate of the pointer in the MapView
+     */
     @Override
     public void pointerPressed(int x, int y) {
         boolean clickedOnAstronaut = false;
-        // Adjust the pointer coordinates based on MapView's position
+        
+        // Adjust the pointer coordinates based on MapView's position relative to its parent container
         x = x - getParent().getAbsoluteX();
         y = y - getParent().getAbsoluteY();
+        
+        // Create points to represent the pointer's position relative to the parent and component
         Point pPtrRelPrnt = new Point(x, y);
         Point pCmpRelPrnt = new Point(getX(), getY());
 
@@ -88,34 +99,40 @@ public class MapView extends Container implements Observer {
             // Get the next GameObject.
             GameObject gameObject = goi.getNext();
 
-            // Check if the pointer is within the object's bounds
-            if (gameObject.contains(pPtrRelPrnt, pCmpRelPrnt) && gw.isPaused()) {	// Check if game is paused and whether pointer is in gameObject
-                if (gameObject instanceof Astronaut) {
-                    Astronaut astronaut = (Astronaut) gameObject;
+            // Check if the object is selectable and if the pointer is within its bounds
+            if(gameObject instanceof ISelectable) {
+                if (((ISelectable) gameObject).contains(pPtrRelPrnt, pCmpRelPrnt) && gw.isPaused()) {  // Check if game is paused and if pointer is inside the object
+                    if (gameObject instanceof Astronaut) {
+                        Astronaut astronaut = (Astronaut) gameObject;
 
-                    // Change the appearance of the astronaut (e.g., change color or image)
-                    astronaut.setSelected(!astronaut.isSelected()); // For example, a flag to indicate selection
-                    
-                    clickedOnAstronaut = true;
-                    // After making changes, repaint the MapView to update the view
+                        // Toggle the astronaut's selection state (select or deselect)
+                        astronaut.setSelected(!astronaut.isSelected());
+                        
+                        clickedOnAstronaut = true;
+                        // After making changes, repaint the MapView to update the view
+                    }
                 }
-            }
-			// If the click was outside any astronaut, deselect all astronauts
-            if (!clickedOnAstronaut) {
-                IIterator goiDeselect = gw.getGameObjects().getIterator();
-                while (goiDeselect.hasNext()) {
-                    // Get the next GameObject.
-                    GameObject gameObject1 = goiDeselect.getNext();
+                
+                // If no astronaut was clicked, deselect all astronauts
+                if (!clickedOnAstronaut) {
+                    IIterator goiDeselect = gw.getGameObjects().getIterator();
+                    while (goiDeselect.hasNext()) {
+                        // Get the next GameObject.
+                        GameObject gameObject1 = goiDeselect.getNext();
 
-                    if (gameObject1 instanceof Astronaut) {
-                        Astronaut astronaut = (Astronaut) gameObject1;
-                        // Deselect all astronauts
-                        astronaut.setSelected(false);
+                        if (gameObject1 instanceof Astronaut) {
+                            Astronaut astronaut = (Astronaut) gameObject1;
+                            // Deselect all astronauts
+                            astronaut.setSelected(false);
+                        }
                     }
                 }
             }
         }
+        
+        // Repaint the MapView to reflect the changes
         repaint();
     }
+
 } 
 
